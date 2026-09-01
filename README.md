@@ -201,8 +201,3 @@ Airport-Dashboard/
 - **Industrial Protocols Emulated**: Real-time simulation of **BACnet/IP**, **Modbus TCP**, **OPC-UA**, and **MQTT**.
 - **Role-Based Access Control**: Structured for Super Admin, Facility Supervisor, and Control Room Operator duty roles.
 
----
-
-## 📄 License
-
-Internal use for **Long Thanh International Airport (LTIA) SCADA / HBMS Development Team**. All rights reserved.
