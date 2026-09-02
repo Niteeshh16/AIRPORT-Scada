@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Activity, AlertTriangle, CheckCircle2, Zap, Server,
   Layers, ArrowRight, ShieldCheck, Clock, Wind, Flame,
-  Package, DoorOpen, ScanLine, Thermometer, Fan
+  Package, DoorOpen, ScanLine, Thermometer, Fan, Globe
 } from 'lucide-react';
 import { useLiveData } from '../context/LiveDataContext';
 import FloorMap from '../components/FloorMap';
@@ -36,12 +36,13 @@ export default function CommandCenter({ onSelectEquipment }) {
   const totalPower = equipmentList.reduce((acc, curr) => acc + (curr.power || 0), 0).toFixed(1);
 
   return (
-    <div className="command-center animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', position: 'relative' }}>
-      {/* Floating Top Alarm Notifications */}
-      <FloatingAlerts />
-
-      {/* 1. Sleek, Compact SCADA Metric Bar with Generous 16px Gaps */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+    <div className="command-center animate-fadeIn" style={{ display: 'flex', gap: '16px', position: 'relative', width: '100%', alignItems: 'flex-start' }}>
+      
+      {/* Main SCADA Operations Left Column */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, minWidth: 0 }}>
+        
+        {/* 1. Sleek, Compact SCADA Metric Bar with Generous 16px Gaps */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
         {/* System Health */}
         <div className="card" style={{ padding: '10px 14px', borderLeft: '3px solid var(--accent-teal)', background: 'var(--bg-surface)' }}>
           <div className="flex items-center justify-between">
@@ -112,9 +113,31 @@ export default function CommandCenter({ onSelectEquipment }) {
               LONG THANH INTERNATIONAL AIRPORT — TERMINAL 1 SCADA SPATIAL BLUEPRINT
             </span>
           </div>
-          <span className="text-2xs text-secondary font-mono">
-            Interactive Node Explorer • Click floor tabs or devices to inspect & control
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-2xs text-secondary font-mono">
+              Interactive Node Explorer • Click floor tabs or devices to inspect & control
+            </span>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => navigate('/digital-twin')}
+              style={{
+                fontSize: '11px',
+                padding: '3px 10px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(56, 189, 248, 0.14)',
+                border: '1px solid rgba(56, 189, 248, 0.35)',
+                color: '#38bdf8',
+                fontWeight: 700,
+                letterSpacing: '0.4px',
+                borderRadius: '6px'
+              }}
+            >
+              <Globe size={13} />
+              <span>3D Digital Twin →</span>
+            </button>
+          </div>
         </div>
 
         <div style={{ background: '#070a10', width: '100%' }}>
@@ -207,6 +230,14 @@ export default function CommandCenter({ onSelectEquipment }) {
           })}
         </div>
       </div>
+      
+      </div> {/* End Main Left Column */}
+
+      {/* Right Side Notification Area */}
+      <div style={{ width: '360px', flexShrink: 0 }}>
+        <FloatingAlerts />
+      </div>
+
     </div>
   );
 }

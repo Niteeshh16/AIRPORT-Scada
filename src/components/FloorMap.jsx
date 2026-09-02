@@ -25,46 +25,46 @@ const equipmentIcons = {
 // 29-Zone Definitions on an 800 x 480 SCADA Viewport
 const ZONE_NODES = [
   // North Pier (Spire)
-  { id: '37', x: 400, y: 55, w: 46, h: 32 },
-  { id: '36', x: 400, y: 92, w: 46, h: 32 },
-  { id: '35', x: 400, y: 129, w: 46, h: 32 },
-  { id: '34', x: 400, y: 166, w: 46, h: 32 },
-  { id: '33', x: 400, y: 203, w: 46, h: 32 },
+  { id: '37', x: 400, y: 65, w: 38, h: 28 },
+  { id: '36', x: 400, y: 98, w: 40, h: 28 },
+  { id: '35', x: 400, y: 131, w: 42, h: 28 },
+  { id: '34', x: 400, y: 164, w: 44, h: 28 },
+  { id: '33', x: 400, y: 197, w: 46, h: 28 },
 
   // West Pier (Wing)
-  { id: '24', x: 125, y: 195, w: 48, h: 28, rot: -22 },
-  { id: '23', x: 185, y: 220, w: 48, h: 28, rot: -22 },
-  { id: '22', x: 245, y: 245, w: 48, h: 28, rot: -22 },
-  { id: '21', x: 305, y: 270, w: 48, h: 28, rot: -22 },
+  { id: '24', x: 125, y: 165, w: 46, h: 26, rot: -28 },
+  { id: '23', x: 185, y: 195, w: 46, h: 26, rot: -26 },
+  { id: '22', x: 245, y: 225, w: 46, h: 26, rot: -24 },
+  { id: '21', x: 305, y: 255, w: 46, h: 26, rot: -22 },
 
   // East Pier (Wing)
-  { id: '44', x: 675, y: 195, w: 48, h: 28, rot: 22 },
-  { id: '43', x: 615, y: 220, w: 48, h: 28, rot: 22 },
-  { id: '42', x: 555, y: 245, w: 48, h: 28, rot: 22 },
-  { id: '41', x: 495, y: 270, w: 48, h: 28, rot: 22 },
+  { id: '44', x: 675, y: 165, w: 46, h: 26, rot: 28 },
+  { id: '43', x: 615, y: 195, w: 46, h: 26, rot: 26 },
+  { id: '42', x: 555, y: 225, w: 46, h: 26, rot: 24 },
+  { id: '41', x: 495, y: 255, w: 46, h: 26, rot: 22 },
 
   // Central Concourse Core - Upper Hub Row
-  { id: '31', x: 326, y: 256, w: 26, h: 28 },
-  { id: '11', x: 354, y: 256, w: 26, h: 28 },
-  { id: '12', x: 377, y: 256, w: 26, h: 28 },
-  { id: '13', x: 400, y: 256, w: 26, h: 28 },
-  { id: '14', x: 423, y: 256, w: 26, h: 28 },
-  { id: '15', x: 446, y: 256, w: 26, h: 28 },
-  { id: '32', x: 474, y: 256, w: 26, h: 28 },
+  { id: '31', x: 326, y: 280, w: 26, h: 28 },
+  { id: '11', x: 354, y: 280, w: 26, h: 28 },
+  { id: '12', x: 377, y: 280, w: 26, h: 28 },
+  { id: '13', x: 400, y: 280, w: 26, h: 28 },
+  { id: '14', x: 423, y: 280, w: 26, h: 28 },
+  { id: '15', x: 446, y: 280, w: 26, h: 28 },
+  { id: '32', x: 474, y: 280, w: 26, h: 28 },
 
   // Central Concourse Core - Middle Hub Row
-  { id: '01', x: 338, y: 310, w: 32, h: 32 },
-  { id: '02', x: 372, y: 310, w: 32, h: 32 },
-  { id: '03', x: 400, y: 310, w: 32, h: 32 },
-  { id: '04', x: 428, y: 310, w: 32, h: 32 },
-  { id: '05', x: 462, y: 310, w: 32, h: 32 },
+  { id: '01', x: 338, y: 320, w: 32, h: 32 },
+  { id: '02', x: 372, y: 320, w: 32, h: 32 },
+  { id: '03', x: 400, y: 320, w: 32, h: 32 },
+  { id: '04', x: 428, y: 320, w: 32, h: 32 },
+  { id: '05', x: 462, y: 320, w: 32, h: 32 },
 
   // Central Concourse Core - Lower Hub Row (Roadway)
-  { id: '51', x: 338, y: 360, w: 32, h: 28 },
-  { id: '52', x: 372, y: 360, w: 32, h: 28 },
-  { id: '53', x: 400, y: 360, w: 32, h: 28 },
-  { id: '54', x: 428, y: 360, w: 32, h: 28 },
-  { id: '55', x: 462, y: 360, w: 32, h: 28 },
+  { id: '51', x: 338, y: 365, w: 32, h: 28 },
+  { id: '52', x: 372, y: 365, w: 32, h: 28 },
+  { id: '53', x: 400, y: 365, w: 32, h: 28 },
+  { id: '54', x: 428, y: 365, w: 32, h: 28 },
+  { id: '55', x: 462, y: 365, w: 32, h: 28 },
 ];
 
 export default function FloorMap({ onSelectEquipment, selectedFloor: externalFloor, height = 520, showControls = true }) {
@@ -147,7 +147,7 @@ export default function FloorMap({ onSelectEquipment, selectedFloor: externalFlo
         </div>
       </div>
 
-      {/* Pure Black Schematic Stage - CAD Blueprint permanently OFF */}
+      {/* Pure Black Schematic Stage - SCADA Blueprint */}
       <div style={{
         position: 'relative',
         height,
@@ -167,25 +167,54 @@ export default function FloorMap({ onSelectEquipment, selectedFloor: externalFlo
             <pattern id="cleanCadGrid" width="25" height="25" patternUnits="userSpaceOnUse">
               <path d="M 25 0 L 0 0 0 25" fill="none" stroke="rgba(255,255,255,0.015)" strokeWidth="0.5" />
             </pattern>
+            <linearGradient id="terminalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#0f172a" />
+              <stop offset="100%" stopColor="#070b14" />
+            </linearGradient>
+            <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="rgba(56, 189, 248, 0.15)" />
+              <stop offset="100%" stopColor="rgba(14, 165, 233, 0.05)" />
+            </linearGradient>
+            <filter id="terminalGlow">
+              <feGaussianBlur stdDeviation="6" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
           </defs>
 
           {/* Clean Dark Grid */}
           <rect width="800" height="460" fill="url(#cleanCadGrid)" />
 
-          {/* Architectural Vector Contours */}
-          <g stroke="rgba(255, 255, 255, 0.25)" strokeWidth="1" fill="none">
-            {/* North Pier Corridor */}
-            <path d="M 374,38 L 426,38 L 426,220 L 374,220 Z" />
+          {/* Lotus Architectural Footprint with Glow */}
+          <g filter="url(#terminalGlow)">
+            <path
+              d="
+                M 365,220
+                L 380,50 Q 400,35 420,50 L 435,220
+                Q 500,220 730,130 Q 750,120 740,140
+                Q 580,240 460,310
+                Q 450,400 400,410 Q 350,400 340,310
+                Q 220,240 60,140 Q 50,120 70,130
+                Q 300,220 365,220 Z
+              "
+              fill="url(#terminalGrad)"
+              stroke="rgba(56, 189, 248, 0.25)"
+              strokeWidth="2"
+            />
+          </g>
 
-            {/* West Pier Wing */}
-            <path d="M 98,180 L 336,256 L 324,288 L 86,212 Z" />
+          {/* Overlaid Lotus Petal Roof Structures */}
+          <g strokeWidth="1.5" fill="none">
+            {/* Outer Petals */}
+            <path d="M 400,160 Q 480,210 500,300 Q 400,380 300,300 Q 320,210 400,160 Z" stroke="rgba(56, 189, 248, 0.15)" />
+            {/* Inner Petals */}
+            <path d="M 400,180 Q 450,220 460,290 Q 400,350 340,290 Q 350,220 400,180 Z" stroke="rgba(56, 189, 248, 0.3)" />
+            {/* Core Glass Dome */}
+            <ellipse cx="400" cy="270" rx="35" ry="50" fill="url(#glassGrad)" stroke="rgba(56, 189, 248, 0.6)" strokeWidth="1" />
 
-            {/* East Pier Wing */}
-            <path d="M 702,180 L 464,256 L 476,288 L 714,212 Z" />
-
-            {/* Central Concourse Outer Perimeter */}
-            <path d="M 310,240 L 490,240 L 496,388 L 304,388 Z" stroke="rgba(255, 255, 255, 0.2)" strokeDasharray="4 2" />
-            <path d="M 304,388 L 496,388" stroke="rgba(255, 255, 255, 0.4)" strokeWidth="1.5" />
+            {/* Pier Centerlines */}
+            <path d="M 400,50 L 400,220" stroke="rgba(255, 255, 255, 0.1)" strokeDasharray="4 4" />
+            <path d="M 370,230 Q 150,170 65,135" stroke="rgba(255, 255, 255, 0.1)" strokeDasharray="4 4" />
+            <path d="M 430,230 Q 650,170 735,135" stroke="rgba(255, 255, 255, 0.1)" strokeDasharray="4 4" />
           </g>
 
           {/* Render All 29 Numbered Zones */}
@@ -207,8 +236,9 @@ export default function FloorMap({ onSelectEquipment, selectedFloor: externalFlo
                   width={z.w}
                   height={z.h}
                   fill={isFaulted ? 'rgba(245, 166, 35, 0.2)' : isHovered ? 'rgba(56, 189, 248, 0.2)' : 'rgba(15, 23, 42, 0.7)'}
-                  stroke={isFaulted ? '#f5a623' : isHovered ? '#38bdf8' : 'rgba(255, 255, 255, 0.22)'}
+                  stroke={isFaulted ? '#f5a623' : isHovered ? '#38bdf8' : 'rgba(255, 255, 255, 0.15)'}
                   strokeWidth={isFaulted || isHovered ? '1.5' : '0.8'}
+                  rx="3"
                 />
 
                 {isFaulted ? (
@@ -232,7 +262,7 @@ export default function FloorMap({ onSelectEquipment, selectedFloor: externalFlo
                   <text
                     x={z.x}
                     y={z.y}
-                    fill={isHovered ? '#38bdf8' : '#ffffff'}
+                    fill={isHovered ? '#38bdf8' : '#8f9fb2'}
                     fontSize="10"
                     fontWeight="600"
                     fontFamily="'JetBrains Mono', monospace"

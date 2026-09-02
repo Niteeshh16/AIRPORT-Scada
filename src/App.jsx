@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { LiveDataProvider, useLiveData } from './context/LiveDataContext';
 import Sidebar from './components/Sidebar';
@@ -19,6 +19,7 @@ import WorkOrders from './pages/WorkOrders';
 import AssetManagement from './pages/AssetManagement';
 import SOPManagement from './pages/SOPManagement';
 import UserManagement from './pages/UserManagement';
+const DigitalTwin = lazy(() => import('./pages/DigitalTwin'));
 
 function AppContent() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -38,8 +39,9 @@ function AppContent() {
   useEffect(() => {
     const handler = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
-      
+
       switch (e.key.toLowerCase()) {
+        case 'd': navigate('/digital-twin'); break;
         case 'm': navigate('/map'); break;
         case 'a': navigate('/alerts'); break;
         case 'e': navigate('/equipment'); break;
@@ -75,20 +77,21 @@ function AppContent() {
     if (path === '/assets') return 'Asset Management';
     if (path === '/sop') return 'SOP Management';
     if (path === '/users') return 'User Management';
+    if (path === '/digital-twin') return 'Airport Digital Twin 3D';
     return 'SCADA Control';
   };
 
   return (
     <div className="app-layout">
       {/* Left Navigation Sidebar */}
-      <Sidebar 
-        collapsed={sidebarCollapsed} 
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
+      <Sidebar
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
 
       {/* Main SCADA Workspace */}
       <div className="app-main">
-        <Header 
+        <Header
           currentTime={currentTime}
           moduleName={getModuleName()}
           onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -100,7 +103,9 @@ function AppContent() {
               <Route path="/" element={<CommandCenter onSelectEquipment={handleSelectEquipment} />} />
               <Route path="/command-center" element={<CommandCenter onSelectEquipment={handleSelectEquipment} />} />
               <Route path="/operator-mode" element={<OperatorMode onSelectEquipment={handleSelectEquipment} />} />
+              <Route path="/operator" element={<OperatorMode onSelectEquipment={handleSelectEquipment} />} />
               <Route path="/supervisor-mode" element={<SupervisorMode />} />
+              <Route path="/supervisor" element={<SupervisorMode />} />
               <Route path="/map" element={<LiveMap onSelectEquipment={handleSelectEquipment} />} />
               <Route path="/subsystems" element={<Subsystems />} />
               <Route path="/subsystems/:id" element={<SubsystemDetail onSelectEquipment={handleSelectEquipment} />} />
@@ -111,6 +116,11 @@ function AppContent() {
               <Route path="/assets" element={<AssetManagement onSelectEquipment={handleSelectEquipment} />} />
               <Route path="/sop" element={<SOPManagement />} />
               <Route path="/users" element={<UserManagement />} />
+              <Route path="/digital-twin" element={
+                <Suspense fallback={<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:'#38bdf8',fontFamily:'monospace',fontSize:13,letterSpacing:2}}>Loading 3D Scene...</div>}>
+                  <DigitalTwin />
+                </Suspense>
+              } />
             </Routes>
           </div>
 
@@ -120,9 +130,9 @@ function AppContent() {
       </div>
 
       {/* Slide-In Equipment Detail Inspection Panel */}
-      <InspectionPanel 
-        equipment={selectedEquipment} 
-        onClose={handleCloseInspection} 
+      <InspectionPanel
+        equipment={selectedEquipment}
+        onClose={handleCloseInspection}
       />
     </div>
   );

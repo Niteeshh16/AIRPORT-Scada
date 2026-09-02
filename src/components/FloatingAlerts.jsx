@@ -23,22 +23,55 @@ export default function FloatingAlerts() {
     handleDismiss(id);
   };
 
-  if (activeFloatingAlerts.length === 0) return null;
+  if (activeFloatingAlerts.length === 0) {
+    return (
+      <div
+        className="floating-alerts-container"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          width: '100%',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '8px 12px',
+            background: 'rgba(15, 23, 42, 0.4)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '6px',
+          }}
+        >
+          <span className="font-mono text-3xs font-bold text-tertiary tracking-wider uppercase">
+            LIVE ALARMS (0 ACTIVE)
+          </span>
+        </div>
+        <div style={{
+          padding: '24px',
+          textAlign: 'center',
+          background: 'rgba(15, 23, 42, 0.2)',
+          borderRadius: '8px',
+          border: '1px dashed rgba(255, 255, 255, 0.1)',
+          color: 'var(--text-tertiary)',
+          fontSize: '11px'
+        }}>
+          No critical or high alarms active.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
       className="floating-alerts-container animate-slideInDown"
       style={{
-        position: 'fixed',
-        top: '64px',
-        right: '24px',
-        zIndex: 9999,
         display: 'flex',
         flexDirection: 'column',
         gap: '8px',
-        maxWidth: '380px',
-        width: 'calc(100% - 48px)',
-        pointerEvents: 'auto'
+        width: '100%'
       }}
     >
       {/* Top Banner Bar */}

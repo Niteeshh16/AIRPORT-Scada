@@ -1,8 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, Map, Layers, Cpu, AlertTriangle, 
-  TrendingUp, Wrench, Shield, FileText, Users, Activity
+import {
+  LayoutDashboard, Map, Layers, Cpu, AlertTriangle,
+  TrendingUp, Wrench, Shield, FileText, Users, Activity, Globe
 } from 'lucide-react';
 import { useLiveData } from '../context/LiveDataContext';
 
@@ -12,6 +12,7 @@ export default function Sidebar({ collapsed, onToggle }) {
 
   const mainNav = [
     { to: '/', label: 'Command Center', icon: LayoutDashboard },
+    { to: '/digital-twin', label: '3D Digital Twin', icon: Globe, tag: '3D TWIN' },
     { to: '/map', label: 'Live Building Map', icon: Map },
     { to: '/subsystems', label: 'Building Subsystems', icon: Layers },
     { to: '/equipment', label: 'Equipment Explorer', icon: Cpu },
@@ -67,6 +68,25 @@ export default function Sidebar({ collapsed, onToggle }) {
                   <Icon size={16} />
                 </div>
                 <span className="nav-item-text">{item.label}</span>
+                {item.tag && (
+                  <span
+                    style={{
+                      marginLeft: 'auto',
+                      fontSize: '9px',
+                      fontFamily: 'monospace',
+                      fontWeight: 800,
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      background: 'rgba(56, 189, 248, 0.18)',
+                      color: '#38bdf8',
+                      border: '1px solid rgba(56, 189, 248, 0.4)',
+                      letterSpacing: '0.6px',
+                      boxShadow: '0 0 10px rgba(56, 189, 248, 0.25)',
+                    }}
+                  >
+                    {item.tag}
+                  </span>
+                )}
                 {item.badge > 0 && (
                   <span className="nav-item-badge critical">{item.badge}</span>
                 )}
@@ -91,14 +111,14 @@ export default function Sidebar({ collapsed, onToggle }) {
                   title={`${sys.id} - ${sys.name}`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span 
-                      style={{ 
-                        width: 6, 
-                        height: 6, 
-                        borderRadius: '50%', 
-                        background: isCritical ? 'var(--status-critical)' : sys.warnings > 0 ? 'var(--status-warning)' : 'var(--status-operational)', 
-                        flexShrink: 0 
-                      }} 
+                    <span
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        background: isCritical ? 'var(--status-critical)' : sys.warnings > 0 ? 'var(--status-warning)' : 'var(--status-operational)',
+                        flexShrink: 0
+                      }}
                     />
                     <div className="flex flex-col min-w-0">
                       <span className="font-mono text-xs font-bold text-primary leading-tight">{sys.id}</span>
@@ -106,8 +126,8 @@ export default function Sidebar({ collapsed, onToggle }) {
                     </div>
                   </div>
 
-                  <span 
-                    className={`status-badge ${sys.status}`} 
+                  <span
+                    className={`status-badge ${sys.status}`}
                     style={{ fontSize: '8px', padding: '1px 5px', flexShrink: 0 }}
                   >
                     {sys.health}%

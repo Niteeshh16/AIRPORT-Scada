@@ -2,87 +2,86 @@ import React from 'react';
 import { useLiveData } from '../context/LiveDataContext';
 
 // 29-Zone Geometric Definitions for Long Thanh Terminal 1
-// Matching the official SCADA schematic from reference layout
+// Matching the official SCADA schematic from user reference Image 1
 const NORTH_PIER_ZONES = [
-  { id: '37', x: 210, y: 32, w: 26, h: 20 },
-  { id: '36', x: 210, y: 55, w: 26, h: 20 },
-  { id: '35', x: 210, y: 78, w: 26, h: 20 },
-  { id: '34', x: 210, y: 101, w: 26, h: 20 },
-  { id: '33', x: 210, y: 124, w: 26, h: 20 },
+  { id: '37', x: 210, y: 32, w: 24, h: 19 },
+  { id: '36', x: 210, y: 53, w: 24, h: 19 },
+  { id: '35', x: 210, y: 74, w: 24, h: 19 },
+  { id: '34', x: 210, y: 95, w: 24, h: 19 },
+  { id: '33', x: 210, y: 116, w: 24, h: 19 },
 ];
 
 const WEST_PIER_ZONES = [
-  { id: '24', x: 58, y: 118, w: 28, h: 18, rot: -22 },
-  { id: '23', x: 94, y: 133, w: 28, h: 18, rot: -22 },
-  { id: '22', x: 130, y: 148, w: 28, h: 18, rot: -22 },
-  { id: '21', x: 166, y: 163, w: 28, h: 18, rot: -22 },
+  { id: '24', x: 55, y: 115, w: 26, h: 17, rot: -20 },
+  { id: '23', x: 88, y: 127, w: 26, h: 17, rot: -20 },
+  { id: '22', x: 121, y: 139, w: 26, h: 17, rot: -20 },
+  { id: '21', x: 154, y: 151, w: 26, h: 17, rot: -20 },
 ];
 
 const EAST_PIER_ZONES = [
-  { id: '44', x: 362, y: 118, w: 28, h: 18, rot: 22 },
-  { id: '43', x: 326, y: 133, w: 28, h: 18, rot: 22 },
-  { id: '42', x: 290, y: 148, w: 28, h: 18, rot: 22 },
-  { id: '41', x: 254, y: 163, w: 28, h: 18, rot: 22 },
+  { id: '44', x: 365, y: 115, w: 26, h: 17, rot: 20 },
+  { id: '43', x: 332, y: 127, w: 26, h: 17, rot: 20 },
+  { id: '42', x: 299, y: 139, w: 26, h: 17, rot: 20 },
+  { id: '41', x: 266, y: 151, w: 26, h: 17, rot: 20 },
 ];
 
 const HUB_UPPER_ZONES = [
-  { id: '31', x: 172, y: 154, w: 16, h: 18 },
-  { id: '11', x: 188, y: 154, w: 15, h: 18 },
-  { id: '12', x: 202, y: 154, w: 15, h: 18 },
-  { id: '13', x: 216, y: 154, w: 15, h: 18 },
-  { id: '14', x: 230, y: 154, w: 15, h: 18 },
-  { id: '15', x: 244, y: 154, w: 15, h: 18 },
-  { id: '32', x: 259, y: 154, w: 16, h: 18 },
+  { id: '31', x: 175, y: 152, w: 14, h: 17 },
+  { id: '11', x: 188, y: 152, w: 12, h: 17 },
+  { id: '12', x: 199, y: 152, w: 11, h: 17 },
+  { id: '13', x: 210, y: 152, w: 12, h: 17 },
+  { id: '14', x: 221, y: 152, w: 11, h: 17 },
+  { id: '15', x: 232, y: 152, w: 12, h: 17 },
+  { id: '32', x: 245, y: 152, w: 14, h: 17 },
 ];
 
 const HUB_MIDDLE_ZONES = [
-  { id: '01', x: 178, y: 188, w: 19, h: 20 },
-  { id: '02', x: 198, y: 188, w: 19, h: 20 },
-  { id: '03', x: 218, y: 188, w: 19, h: 20 },
-  { id: '04', x: 238, y: 188, w: 19, h: 20 },
-  { id: '05', x: 258, y: 188, w: 19, h: 20 },
+  { id: '01', x: 177, y: 182, w: 18, h: 19 },
+  { id: '02', x: 196, y: 182, w: 18, h: 19 },
+  { id: '03', x: 210, y: 182, w: 18, h: 19 },
+  { id: '04', x: 224, y: 182, w: 18, h: 19 },
+  { id: '05', x: 243, y: 182, w: 18, h: 19 },
 ];
 
 const HUB_LOWER_ZONES = [
-  { id: '51', x: 178, y: 220, w: 19, h: 18 },
-  { id: '52', x: 198, y: 220, w: 19, h: 18 },
-  { id: '53', x: 218, y: 220, w: 19, h: 18 },
-  { id: '54', x: 238, y: 220, w: 19, h: 18 },
-  { id: '55', x: 258, y: 220, w: 19, h: 18 },
+  { id: '51', x: 177, y: 212, w: 18, h: 17 },
+  { id: '52', x: 196, y: 212, w: 18, h: 17 },
+  { id: '53', x: 210, y: 212, w: 18, h: 17 },
+  { id: '54', x: 224, y: 212, w: 18, h: 17 },
+  { id: '55', x: 243, y: 212, w: 18, h: 17 },
 ];
 
 export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) {
   return (
     <svg
-      viewBox="0 0 420 260"
+      viewBox="0 0 420 250"
       width="100%"
       height="100%"
       style={{ background: '#000000', display: 'block' }}
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
-        {/* Subtle CAD grid */}
-        <pattern id="microGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+        <pattern id="microGrid2" width="20" height="20" patternUnits="userSpaceOnUse">
           <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.015)" strokeWidth="0.5" />
         </pattern>
       </defs>
 
-      <rect width="420" height="260" fill="url(#microGrid)" />
+      <rect width="420" height="250" fill="url(#microGrid2)" />
 
       {/* Main Architectural Pier Contours */}
-      <g stroke="rgba(255, 255, 255, 0.28)" strokeWidth="0.9" fill="none">
-        {/* North Pier Spire boundary */}
-        <path d="M 197,22 L 223,22 L 223,135 L 197,135 Z" />
+      <g stroke="rgba(255, 255, 255, 0.28)" strokeWidth="0.85" fill="none">
+        {/* North Pier Spire corridor */}
+        <path d="M 198,22 L 222,22 L 222,126 L 198,126 Z" />
 
-        {/* West Wing Pier boundary */}
-        <path d="M 44,108 L 180,154 L 174,174 L 38,128 Z" />
+        {/* West Wing Pier corridor */}
+        <path d="M 42,107 L 167,152 L 161,170 L 36,125 Z" />
 
-        {/* East Wing Pier boundary */}
-        <path d="M 376,108 L 240,154 L 246,174 L 382,128 Z" />
+        {/* East Wing Pier corridor */}
+        <path d="M 378,107 L 253,152 L 259,170 L 384,125 Z" />
 
-        {/* Concourse Core outer boundaries */}
-        <path d="M 164,145 L 267,145 L 274,238 L 157,238 Z" stroke="rgba(255, 255, 255, 0.2)" strokeDasharray="3 2" />
-        <path d="M 157,238 L 274,238" stroke="rgba(255, 255, 255, 0.4)" strokeWidth="1.2" />
+        {/* Concourse Core boundaries */}
+        <path d="M 166,143 L 254,143 L 258,226 L 162,226 Z" stroke="rgba(255, 255, 255, 0.2)" strokeDasharray="3 2" />
+        <path d="M 162,226 L 258,226" stroke="rgba(255, 255, 255, 0.45)" strokeWidth="1.2" />
       </g>
 
       {/* 1. North Pier Zones (37, 36, 35, 34, 33) */}
@@ -101,7 +100,7 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
             x={z.x}
             y={z.y}
             fill="#ffffff"
-            fontSize="9.5"
+            fontSize="9"
             fontWeight="600"
             fontFamily="'JetBrains Mono', monospace"
             textAnchor="middle"
@@ -122,19 +121,19 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
               y={z.y - z.h / 2}
               width={z.w}
               height={z.h}
-              fill={isFaulted ? 'rgba(245, 166, 35, 0.18)' : 'rgba(15, 23, 42, 0.65)'}
+              fill={isFaulted ? 'rgba(245, 166, 35, 0.2)' : 'rgba(15, 23, 42, 0.65)'}
               stroke={isFaulted ? '#f5a623' : 'rgba(255, 255, 255, 0.22)'}
-              strokeWidth={isFaulted ? '1.2' : '0.75'}
+              strokeWidth={isFaulted ? '1.4' : '0.75'}
             />
             {isFaulted ? (
               <g>
-                <circle cx={z.x} cy={z.y} r="13" fill="rgba(245, 166, 35, 0.3)" className="pulse-ring-anim" />
-                <circle cx={z.x} cy={z.y} r="6.5" fill="#f5a623" />
+                <circle cx={z.x} cy={z.y} r="12" fill="rgba(245, 166, 35, 0.3)" className="pulse-ring-anim" />
+                <circle cx={z.x} cy={z.y} r="6" fill="#f5a623" />
                 <text
                   x={z.x}
                   y={z.y}
                   fill="#000000"
-                  fontSize="8.5"
+                  fontSize="8"
                   fontWeight="800"
                   fontFamily="'JetBrains Mono', monospace"
                   textAnchor="middle"
@@ -148,7 +147,7 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
                 x={z.x}
                 y={z.y}
                 fill="#ffffff"
-                fontSize="9.5"
+                fontSize="9"
                 fontWeight="600"
                 fontFamily="'JetBrains Mono', monospace"
                 textAnchor="middle"
@@ -177,7 +176,7 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
             x={z.x}
             y={z.y}
             fill="#ffffff"
-            fontSize="9.5"
+            fontSize="9"
             fontWeight="600"
             fontFamily="'JetBrains Mono', monospace"
             textAnchor="middle"
@@ -204,7 +203,7 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
             x={z.x}
             y={z.y}
             fill="#ffffff"
-            fontSize="9"
+            fontSize="8"
             fontWeight="600"
             fontFamily="'JetBrains Mono', monospace"
             textAnchor="middle"
@@ -231,7 +230,7 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
             x={z.x}
             y={z.y}
             fill="#ffffff"
-            fontSize="9.5"
+            fontSize="9"
             fontWeight="600"
             fontFamily="'JetBrains Mono', monospace"
             textAnchor="middle"
@@ -258,7 +257,7 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
             x={z.x}
             y={z.y}
             fill="#ffffff"
-            fontSize="9.5"
+            fontSize="9"
             fontWeight="600"
             fontFamily="'JetBrains Mono', monospace"
             textAnchor="middle"
@@ -273,8 +272,7 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
 }
 
 export default function MultiFloorMapGrid({ selectedFloor, onSelectFloor, fullView = false, compact = false }) {
-  const { alerts, equipmentList } = useLiveData();
-
+  // Only First Floor (1F) has the active Zone 23 thermal alert matching Screenshot 1
   const floorList = [
     { id: 'PIT', label: 'PIT Floor', code: 'PIT' },
     { id: 'GF', label: 'Ground Floor', code: 'GF' },
@@ -288,11 +286,7 @@ export default function MultiFloorMapGrid({ selectedFloor, onSelectFloor, fullVi
     <div className={`multi-floor-grid ${fullView ? 'full-map-view' : ''} ${compact ? 'compact' : ''}`}>
       {floorList.map(floor => {
         const isSelected = selectedFloor === floor.id;
-        const floorAlerts = alerts.filter(a => {
-          const eq = equipmentList.find(e => e.id === a.equipment);
-          return eq && eq.floor === floor.id;
-        });
-        const hasCritical = floor.hasAlert || floorAlerts.some(a => a.severity === 'critical');
+        const hasCritical = Boolean(floor.hasAlert);
 
         return (
           <div
