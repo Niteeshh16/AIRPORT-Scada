@@ -66,7 +66,7 @@ export default function AlertsEvents() {
       </div>
 
       {/* Alarm Level Summary Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--space-3)', marginBottom: 'var(--space-5)' }}>
+      <div className="scada-grid-5" style={{ marginBottom: 'var(--space-5)' }}>
         {[
           { label: 'Critical Alarms', count: counts.critical, color: 'critical', sev: 'critical' },
           { label: 'High Priority', count: counts.high, color: 'warning', sev: 'high' },

@@ -67,7 +67,7 @@ const ZONE_NODES = [
   { id: '55', x: 462, y: 365, w: 32, h: 28 },
 ];
 
-export default function FloorMap({ onSelectEquipment, selectedFloor: externalFloor, height = 520, showControls = true }) {
+export default function FloorMap({ onSelectEquipment, selectedFloor: externalFloor, height = 'clamp(320px, 45vh, 560px)', showControls = true }) {
   const { equipmentList, floors, selectedFloor, setSelectedFloor } = useLiveData();
 
   const [internalFloor, setInternalFloor] = useState('1F');
@@ -134,15 +134,20 @@ export default function FloorMap({ onSelectEquipment, selectedFloor: externalFlo
         </div>
 
         {/* Live Status Indicator for active floor */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {currentFloorObj.inventory && (
+            <span className="text-3xs font-mono text-teal bg-elevated px-2 py-1 rounded border border-subtle">
+              Fleet: {currentFloorObj.inventory.ahu} AHUs {currentFloorObj.inventory.ahuFault > 0 ? `(${currentFloorObj.inventory.ahuFault} Flt)` : ''} • {currentFloorObj.inventory.fcu} FCUs • {currentFloorObj.inventory.fans} Fans
+            </span>
+          )}
           {activeFloor === '1F' && (
             <span className="floor-alert-pill" style={{ fontSize: '10px', padding: '3px 8px' }}>
               <span className="live-dot-badge amber" style={{ width: 6, height: 6 }} />
-              Zone 23 Active Alert (AHU-309)
+              Zone 23 Active Alert (AHU-1F-009)
             </span>
           )}
           <span className="text-3xs font-mono text-tertiary">
-            {equipment.length} Active SCADA Nodes
+            {equipment.length} Telemetry Nodes
           </span>
         </div>
       </div>

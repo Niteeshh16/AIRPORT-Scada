@@ -67,7 +67,7 @@ export default function OperatorMode({ onSelectEquipment }) {
           </div>
           <FloorMap 
             onSelectEquipment={handleDeviceClick} 
-            height={380} 
+            height="clamp(300px, 38vh, 460px)" 
             showControls={true}
           />
         </div>
@@ -169,7 +169,7 @@ export default function OperatorMode({ onSelectEquipment }) {
           {/* Live Sensor Readouts */}
           <div className="console-card">
             <div className="console-card-label">CURRENT TELEMETRY</div>
-            <div className="grid grid-cols-3 gap-3 mt-2">
+            <div className="scada-grid-3 mt-2">
               {selectedEquipment.returnTemp !== null && (
                 <div className="console-metric">
                   <span className="text-xs text-tertiary">Return Air</span>

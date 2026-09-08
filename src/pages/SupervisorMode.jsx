@@ -64,7 +64,7 @@ export default function SupervisorMode() {
             </button>
           </div>
 
-          <div className="grid grid-cols-6 gap-2.5">
+          <div className="scada-grid-6">
             {supervisorKpis.map((kpi, idx) => (
               <div 
                 key={idx} 

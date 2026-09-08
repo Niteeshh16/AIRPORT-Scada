@@ -114,10 +114,12 @@
   --transition-panel: 350ms cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Layout */
-  --sidebar-width: 272px;
+  --sidebar-width: 260px;
   --sidebar-collapsed: 64px;
   --header-height: 52px;
-  --panel-width: 420px;
+  --panel-width: 320px;
+  --app-padding: clamp(10px, 1.3vw, 20px);
+  --content-gap: clamp(10px, 1.2vw, 16px);
 }
 
 /* === RESET & BASE === */
@@ -227,7 +229,30 @@ img {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--space-5);
+  padding: var(--app-padding);
+}
+
+.app-content.full-bleed {
+  padding: 0 !important;
+}
+
+/* Modal and Drawer Backdrop Overlays */
+.sidebar-backdrop,
+.ops-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(2px);
+  z-index: 290;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+}
+
+.sidebar-backdrop.active,
+.ops-panel-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* === HEADER === */
@@ -1831,52 +1856,376 @@ img {
   line-height: 1.4;
 }
 
-/* === RESPONSIVE === */
-@media (max-width: 1440px) {
-  .kpi-grid {
-    grid-template-columns: repeat(3, 1fr);
+/* === SCADA RESPONSIVE GRIDS & UTILITIES === */
+.scada-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--content-gap);
+}
+
+.scada-subsystems-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+.scada-grid-6 {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--content-gap);
+}
+
+.scada-grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--content-gap);
+}
+
+.scada-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--content-gap);
+}
+
+.scada-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--content-gap);
+}
+
+.scada-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--content-gap);
+}
+
+.scada-split-2-1 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--content-gap);
+}
+
+.scada-split-1-1 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--content-gap);
+}
+
+.scada-command-center-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--content-gap);
+  position: relative;
+  width: 100%;
+}
+
+.scada-command-main-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--content-gap);
+  width: 100%;
+}
+
+.scada-command-alerts-col {
+  display: none;
+}
+
+/* === UNIVERSAL MULTI-SCREEN & ASPECT RATIO RESPONSIVE BREAKPOINTS === */
+
+/* 1. Large 2K / 4K / Control Wall Displays (>= 2200px) */
+@media (min-width: 2200px) {
+  :root {
+    --app-padding: 24px;
+    --content-gap: 20px;
+    --header-height: 58px;
+    font-size: 17px;
   }
 
-  .subsystem-grid {
-    grid-template-columns: repeat(3, 1fr);
+  .scada-subsystems-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+  }
+
+  .scada-grid-6 {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+  }
+
+  .scada-command-alerts-col {
+    width: 400px;
   }
 }
 
-@media (max-width: 1200px) {
-  .kpi-grid {
+/* 2. Wide Screens & 1080p Desktop (1600px - 2199px) */
+@media (max-width: 1799px) {
+  .scada-subsystems-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* 3. Standard Laptops & Sub-1600px Displays (1366px - 1599px, e.g. 1440x900, 1536x864) */
+@media (max-width: 1599px) {
+  .scada-subsystems-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .scada-grid-6 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .scada-command-alerts-col {
+    width: 320px;
+  }
+}
+
+/* 4. Compact Laptops & Squeezed Workspaces (1280px - 1399px, e.g. 1366x768, 1280x800) */
+@media (max-width: 1399px) {
+  .scada-command-center-layout {
+    flex-direction: column;
+  }
+
+  .scada-command-alerts-col {
+    width: 100%;
+  }
+
+  .scada-grid-5 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .scada-split-2-1 {
+    grid-template-columns: 1fr;
+  }
+
+  .operator-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 5. Medium Displays & Split-Screen (1025px - 1280px) */
+@media (max-width: 1280px) {
+  :root {
+    --header-height: 48px;
+    --sidebar-width: 240px;
+    --app-padding: 12px;
+  }
+
+  .kpi-grid,
+  .scada-kpi-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .scada-subsystems-grid,
   .subsystem-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .scada-grid-6 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .scada-grid-4 {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  /* OpsPanel transforms into an interactive slide-in drawer on laptop/compact displays */
   .ops-panel {
-    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    height: 100vh;
+    z-index: 450;
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.7);
+    transform: translateX(100%);
+    width: 340px !important;
+    max-width: 90vw;
+    transition: transform var(--transition-panel);
+    opacity: 1 !important;
+    display: flex !important;
+  }
+
+  .ops-panel:not(.collapsed) {
+    transform: translateX(0);
+  }
+
+  .ops-panel.collapsed {
+    transform: translateX(100%);
+    width: 340px !important;
+    opacity: 1 !important;
   }
 }
 
-@media (max-width: 768px) {
-  .kpi-grid {
-    grid-template-columns: 1fr;
+/* 6. Tablets & Small Laptops (769px - 1024px, 4:3 iPads, portrait laptops) */
+@media (max-width: 1024px) {
+  :root {
+    --app-padding: 10px;
+    --header-height: 46px;
   }
 
-  .subsystem-grid {
-    grid-template-columns: 1fr;
-  }
-
+  /* Sidebar becomes an off-canvas drawer */
   .sidebar {
     position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100vh;
+    z-index: 500;
     transform: translateX(-100%);
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.7);
+    transition: transform var(--transition-panel);
   }
 
   .sidebar.mobile-open {
     transform: translateX(0);
   }
 
+  .scada-subsystems-grid,
+  .subsystem-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .multi-floor-grid,
+  .multi-floor-grid.full-map-view {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bottom-ops-tri-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trend-modal-box {
+    width: 96vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
+
+/* 7. Mobile & Narrow Displays (< 768px) */
+@media (max-width: 768px) {
+  :root {
+    --app-padding: 8px;
+    --content-gap: 8px;
+    --header-height: 44px;
+  }
+
+  .header-airport-name {
+    font-size: 12px;
+  }
+
+  .header-module-name,
+  .header-divider,
+  .header-status,
   .header-user-info,
-  .header-timestamp {
+  .header-clock {
     display: none;
+  }
+
+  .scada-kpi-grid,
+  .kpi-grid,
+  .scada-grid-4,
+  .scada-grid-5,
+  .scada-grid-6,
+  .subsystem-grid,
+  .scada-subsystems-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .multi-floor-grid,
+  .multi-floor-grid.full-map-view {
+    grid-template-columns: 1fr;
+  }
+
+  .trend-kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .operator-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .inspection-panel {
+    width: 100% !important;
+    max-width: 100vw;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+}
+
+/* === VERTICAL HEIGHT ADAPTABILITY (for 768px, 800px, and low-profile laptop screens) === */
+@media (max-height: 850px) {
+  :root {
+    --header-height: 46px;
+    --app-padding: 10px;
+  }
+
+  .card-header {
+    padding: 6px 10px;
+  }
+
+  .card-body {
+    padding: 10px;
+  }
+
+  .operator-alerts-list {
+    max-height: 280px;
+  }
+}
+
+@media (max-height: 680px) {
+  :root {
+    --header-height: 42px;
+    --app-padding: 8px;
+  }
+
+  .scada-subsystems-grid {
+    gap: 6px;
+  }
+
+  .subsystem-card {
+    min-height: 72px !important;
+    padding: 8px !important;
+  }
+}
+
+/* === ASPECT RATIO OPTIMIZATIONS === */
+
+/* Ultra-wide Monitors (21:9, 32:9) */
+@media (min-aspect-ratio: 21/9) {
+  .command-center {
+    max-width: 100%;
+  }
+
+  .scada-subsystems-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .scada-grid-6 {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .scada-kpi-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Traditional / Square Aspect Ratios (4:3, 5:4) */
+@media (max-aspect-ratio: 4/3) {
+  .scada-command-center-layout {
+    flex-direction: column;
+  }
+
+  .scada-command-alerts-col {
+    width: 100%;
+  }
+
+  .multi-floor-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -4579,43 +4928,573 @@ select option {
   box-shadow: 0 0 10px rgba(34, 201, 151, 0.25);
 }
 
-/* Full Map View 6-Floor Grid (Screenshot 1) */
+/* ============================================================
+   TOP NOTIFICATION BAR & HEADER ALARM DROPDOWN
+   ============================================================ */
+.top-notification-banner {
+  position: sticky;
+  top: 0;
+  z-index: 95;
+  width: 100%;
+  background: rgba(10, 14, 24, 0.96);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(239, 68, 68, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+.top-notification-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  gap: 16px;
+  min-height: 42px;
+}
+
+.top-notification-inner.critical {
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.18) 0%, rgba(15, 23, 42, 0.4) 20%, rgba(15, 23, 42, 0.4) 80%, rgba(239, 68, 68, 0.18) 100%);
+  border-bottom-color: rgba(239, 68, 68, 0.5);
+}
+
+.top-notification-inner.warning {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.18) 0%, rgba(15, 23, 42, 0.4) 20%, rgba(15, 23, 42, 0.4) 80%, rgba(245, 158, 11, 0.18) 100%);
+  border-bottom-color: rgba(245, 158, 11, 0.5);
+}
+
+.top-notif-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.top-notif-icon-box {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.top-notif-icon-box.critical {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.top-notif-icon-box.warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.top-notif-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.top-notif-badge.critical {
+  background: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+.top-notif-badge.warning {
+  background: #f59e0b;
+  color: #000000;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+}
+
+.top-notif-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+}
+
+.top-notif-tag {
+  color: var(--accent-teal);
+  font-weight: 700;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.top-notif-divider {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.top-notif-msg {
+  color: var(--text-primary);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-notif-time {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.top-notif-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.top-notif-pager {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.top-notif-pager-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  border-radius: 2px;
+  transition: all 0.15s;
+}
+
+.top-notif-pager-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.top-notif-ack-btn {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #22c55e;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s;
+}
+
+.top-notif-ack-btn:hover {
+  background: #22c55e;
+  color: #000000;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+}
+
+.top-notif-view-btn {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s;
+}
+
+.top-notif-view-btn:hover {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: #38bdf8;
+}
+
+.top-notif-dismiss-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.top-notif-dismiss-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Header Bell Dropdown Menu */
+.top-notif-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 380px;
+  background: rgba(13, 17, 28, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 1px rgba(255, 255, 255, 0.2);
+  z-index: 120;
+  overflow: hidden;
+}
+
+.top-notif-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.top-notif-dropdown-body {
+  max-height: 380px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+}
+
+.top-notif-dropdown-item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.15s;
+}
+
+.top-notif-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.top-notif-dropdown-item.critical {
+  border-left: 3px solid #ef4444;
+}
+
+.top-notif-dropdown-item.high {
+  border-left: 3px solid #f59e0b;
+}
+
+.top-notif-dropdown-footer {
+  padding: 8px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ============================================================
+   COMMAND CENTER FULL-SCREEN & BLUEPRINT TOOLBAR
+   ============================================================ */
+.scada-kpi-card {
+  padding: 10px 16px;
+  background: linear-gradient(145deg, #101522 0%, #0a0d16 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.kpi-icon-pill {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpi-icon-pill.teal {
+  background: rgba(34, 201, 151, 0.15);
+  color: var(--accent-teal);
+}
+
+.kpi-icon-pill.blue {
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--accent-blue);
+}
+
+.kpi-icon-pill.red {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--status-critical);
+}
+
+.kpi-icon-pill.amber {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--status-warning);
+}
+
+.scada-blueprint-card {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  background: #060911;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.scada-blueprint-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #0c101c;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.floor-quick-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 2px 4px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.floor-tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.floor-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.floor-tab-btn.active {
+  background: var(--accent-teal);
+  color: #000000;
+  font-weight: 800;
+  box-shadow: 0 0 10px rgba(34, 201, 151, 0.35);
+}
+
+/* ============================================================
+   FULL-MAP VIEW 6-FLOOR BLUEPRINT GRID (EXPANDED TO FILL SCREEN)
+   ============================================================ */
 .multi-floor-grid.full-map-view {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 14px;
+  width: 100%;
 }
 
 .multi-floor-grid.full-map-view .floor-tile-card {
-  min-height: 290px;
+  min-height: 320px;
   display: flex;
   flex-direction: column;
-  background: #000000;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 8px 10px;
+  justify-content: space-between;
+  background: linear-gradient(180deg, #0d1220 0%, #060911 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.floor-tile-card.has-critical {
-  border-color: #f5a623 !important;
-  box-shadow: 0 0 16px rgba(245, 166, 35, 0.25) !important;
+.multi-floor-grid.full-map-view .floor-tile-card:hover {
+  border-color: rgba(56, 189, 248, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.15);
+}
+
+.multi-floor-grid.full-map-view .floor-tile-card.has-critical {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3) !important;
+}
+
+.multi-floor-grid.full-map-view .floor-tile-card.selected {
+  border-color: #38bdf8;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+}
+
+.floor-tile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.floor-tile-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 2px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .floor-tile-badge.alert {
-  background: rgba(245, 166, 35, 0.2);
-  color: #f5a623;
-  border: 1px solid rgba(245, 166, 35, 0.4);
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.floor-tile-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.floor-tile-desc {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
 }
 
 .floor-alert-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(245, 166, 35, 0.15);
-  color: #f5a623;
-  border: 1px solid rgba(245, 166, 35, 0.4);
+  gap: 5px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
   border-radius: 4px;
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 7px;
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+
+.floor-normal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: 2px 7px;
+  flex-shrink: 0;
+}
+
+.floor-tile-blueprint {
+  position: relative;
+  width: 100%;
+  min-height: 210px;
+  background: #000000;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.floor-blueprint-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 10, 18, 0.72);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #38bdf8;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.floor-tile-card:hover .floor-blueprint-overlay {
+  opacity: 1;
+}
+
+.floor-tile-details {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.floor-details-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.floor-metric-chip {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.floor-details-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 1400px) {
+  .multi-floor-grid.full-map-view {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .multi-floor-grid.full-map-view {
+    grid-template-columns: 1fr !important;
+  }
+
+  .floor-details-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .top-notification-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .top-notif-right {
+    width: 100%;
+    justify-content: space-between;
+  }
 }

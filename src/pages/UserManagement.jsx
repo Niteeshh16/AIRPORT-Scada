@@ -22,7 +22,7 @@ export default function UserManagement() {
       </div>
 
       {/* Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-3)', marginBottom: 'var(--space-5)' }}>
+      <div className="scada-grid-3" style={{ marginBottom: 'var(--space-5)' }}>
         <div className="card" style={{ padding: 'var(--space-4)' }}>
           <div className="kpi-label">Total Users</div>
           <div className="kpi-value teal">{USERS.length}</div>

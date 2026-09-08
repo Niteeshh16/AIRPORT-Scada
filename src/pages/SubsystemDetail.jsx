@@ -3,9 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Search, ArrowLeft, Filter, AlertTriangle, CheckCircle2, 
   RotateCcw, Sliders, Power, Layers, Thermometer, Wind, Gauge,
-  Clock, ShieldCheck
+  Clock, ShieldCheck, Zap
 } from 'lucide-react';
 import { useLiveData } from '../context/LiveDataContext';
+import SCADASchematic from '../components/SCADASchematic';
 
 export default function SubsystemDetail({ onSelectEquipment }) {
   const { id } = useParams();
@@ -21,8 +22,13 @@ export default function SubsystemDetail({ onSelectEquipment }) {
   const currentSubsystem = subsystems.find(s => s.id === sysCode) || {
     id: sysCode,
     name: 'Building Subsystem',
-    description: 'Real-time SCADA subsystem telemetry and node controls',
-    health: 96,
+    protocol: 'OPC UA',
+    integrationType: 'Industrial Telemetry',
+    total: 100,
+    operational: 98,
+    health: 98,
+    status: 'operational',
+    desc: 'Real-time SCADA subsystem telemetry and node controls',
   };
 
   // Filter equipment for this subsystem
@@ -55,8 +61,13 @@ export default function SubsystemDetail({ onSelectEquipment }) {
               <span className={`status-badge ${currentSubsystem.health >= 90 ? 'operational' : 'warning'}`}>
                 {currentSubsystem.health}% SLA
               </span>
+              <span className="text-3xs font-mono text-teal bg-elevated px-2 py-0.5 rounded border border-subtle">
+                {currentSubsystem.protocol}
+              </span>
             </div>
-            <span className="text-2xs text-secondary">{subsystemEquipment.length} Monitored Equipment Nodes</span>
+            <span className="text-2xs text-secondary">
+              {currentSubsystem.total.toLocaleString()} Total System Assets ({subsystemEquipment.length} Sample Telemetry Nodes Filtered) • Mode: Read-Only Supervisory
+            </span>
           </div>
         </div>
 
@@ -104,15 +115,15 @@ export default function SubsystemDetail({ onSelectEquipment }) {
       </div>
 
       {/* 2. Main 2-Column Layout: Equipment Cards Grid + Detailed Inspector */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 'var(--space-4)' }}>
+      <div className="scada-split-2-1">
         {/* Equipment Cards (2 Columns Wide) */}
         <div className="card p-3">
           <div className="card-header py-1 px-2 mb-2 flex justify-between items-center">
-            <span className="card-title text-xs font-mono font-bold uppercase">Equipment Fleet</span>
-            <span className="text-2xs text-tertiary font-mono">{subsystemEquipment.length} devices</span>
+            <span className="card-title text-xs font-mono font-bold uppercase">Subsystem Equipment Fleet</span>
+            <span className="text-2xs text-tertiary font-mono">{subsystemEquipment.length} active nodes</span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', maxHeight: 580, overflowY: 'auto', padding: '2px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '10px', maxHeight: 'clamp(420px, 62vh, 700px)', overflowY: 'auto', padding: '2px' }}>
             {subsystemEquipment.map(eq => {
               const isSelected = selectedDevice?.id === eq.id;
               const isRunning = eq.mode !== 'Stop' && eq.status !== 'offline';
@@ -146,25 +157,43 @@ export default function SubsystemDetail({ onSelectEquipment }) {
 
                   {/* Telemetry Metrics Grid */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px', marginBottom: '8px' }}>
-                    {eq.temp !== null && (
+                    {eq.temp !== null && eq.temp !== undefined && (
                       <div className="param-box">
                         <span className="param-label">Temp</span>
                         <span className="param-val font-mono text-teal">{eq.temp}°C</span>
                       </div>
                     )}
-                    {eq.fanRPM !== null && (
+                    {eq.fanRPM !== null && eq.fanRPM !== undefined && (
                       <div className="param-box">
                         <span className="param-label">Fan Speed</span>
                         <span className="param-val font-mono">{eq.fanRPM} RPM</span>
                       </div>
                     )}
-                    {eq.coolingValve !== null && (
+                    {eq.coolingValve !== null && eq.coolingValve !== undefined && (
                       <div className="param-box">
                         <span className="param-label">Cooling Valve</span>
                         <span className="param-val font-mono text-amber">{eq.coolingValve}%</span>
                       </div>
                     )}
-                    {eq.power !== null && (
+                    {eq.voltage !== null && eq.voltage !== undefined && (
+                      <div className="param-box">
+                        <span className="param-label">Voltage</span>
+                        <span className="param-val font-mono text-cyan">{eq.voltage} V</span>
+                      </div>
+                    )}
+                    {eq.powerFactor !== null && eq.powerFactor !== undefined && (
+                      <div className="param-box">
+                        <span className="param-label">cos φ</span>
+                        <span className="param-val font-mono text-teal">{eq.powerFactor}</span>
+                      </div>
+                    )}
+                    {eq.shutterState && (
+                      <div className="param-box">
+                        <span className="param-label">Shutter</span>
+                        <span className={`param-val font-mono ${eq.shutterState === 'Closed' ? 'text-red' : 'text-teal'}`}>{eq.shutterState}</span>
+                      </div>
+                    )}
+                    {eq.power !== null && eq.power !== undefined && (
                       <div className="param-box">
                         <span className="param-label">Power</span>
                         <span className="param-val font-mono">{eq.power} kW</span>
@@ -206,18 +235,21 @@ export default function SubsystemDetail({ onSelectEquipment }) {
 
         {/* Device Live Inspector (1 Column Wide) */}
         {selectedDevice && (
-          <div className="card p-3">
-            <div className="card-header py-1 px-2 mb-3 flex justify-between items-center">
-              <span className="card-title text-xs font-mono font-bold uppercase">Device Inspector</span>
+          <div className="card p-3 flex flex-col gap-3">
+            <div className="card-header py-1 px-2 mb-1 flex justify-between items-center">
+              <span className="card-title text-xs font-mono font-bold uppercase">Device Inspector & Schematic</span>
               <span className={`status-badge ${selectedDevice.status}`}>
                 {selectedDevice.status.toUpperCase()}
               </span>
             </div>
 
+            {/* Industrial SCADA Schematic Diagram */}
+            <SCADASchematic equipment={selectedDevice} />
+
             <div className="flex flex-col gap-3">
               <div className="p-2.5 bg-elevated rounded border border-subtle">
                 <div className="font-mono text-sm font-bold text-primary">{selectedDevice.id}</div>
-                <div className="text-2xs text-secondary">{selectedDevice.type} • {selectedDevice.system} Subsystem</div>
+                <div className="text-2xs text-secondary">{selectedDevice.type} • {selectedDevice.system} Subsystem ({currentSubsystem.protocol})</div>
                 <div className="text-3xs text-tertiary mt-1">Location: {selectedDevice.floor} — {selectedDevice.zone}</div>
               </div>
 
@@ -248,13 +280,13 @@ export default function SubsystemDetail({ onSelectEquipment }) {
               {/* Mode Switcher */}
               <div className="flex gap-2">
                 <button 
-                  className={`btn btn-sm flex-1 ${selectedDevice.mode === 'Auto' ? 'btn-primary' : 'btn-secondary'}`}
+                  className={`btn btn-sm flex-1 ${selectedDevice.mode === 'Auto' || selectedDevice.mode === 'Closed' ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={() => setEquipmentMode(selectedDevice.id, 'Auto')}
                 >
                   AUTO
                 </button>
                 <button 
-                  className={`btn btn-sm flex-1 ${selectedDevice.mode === 'Manual' ? 'btn-primary' : 'btn-secondary'}`}
+                  className={`btn btn-sm flex-1 ${selectedDevice.mode === 'Manual' || selectedDevice.mode === 'Open' ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={() => setEquipmentMode(selectedDevice.id, 'Manual')}
                 >
                   MANUAL
@@ -269,10 +301,14 @@ export default function SubsystemDetail({ onSelectEquipment }) {
                 </div>
                 <div className="flex justify-between py-1 border-b border-subtle">
                   <span className="text-tertiary">Communication</span>
-                  <span className="text-teal">{selectedDevice.comm || 'Online (BACnet)'}</span>
+                  <span className="text-teal">{selectedDevice.comm || currentSubsystem.protocol}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-subtle">
-                  <span className="text-tertiary">Last Polled</span>
+                  <span className="text-tertiary">Supervisory Mode</span>
+                  <span className="text-secondary">Read-Only (AVEVA UOC)</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-subtle">
+                  <span className="text-tertiary">Last Update</span>
                   <span className="text-secondary">{selectedDevice.lastUpdate}</span>
                 </div>
               </div>

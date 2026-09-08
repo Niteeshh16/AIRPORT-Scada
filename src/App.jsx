@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
-import { LiveDataProvider, useLiveData } from './context/LiveDataContext';
+import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { LiveDataProvider } from './context/LiveDataContext';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
-import OpsPanel from './components/OpsPanel';
+import TopNotificationBar from './components/TopNotificationBar';
 import InspectionPanel from './components/InspectionPanel';
 
 import CommandCenter from './pages/CommandCenter';
 import OperatorMode from './pages/OperatorMode';
 import SupervisorMode from './pages/SupervisorMode';
-import LiveMap from './pages/LiveMap';
 import Subsystems from './pages/Subsystems';
 import SubsystemDetail from './pages/SubsystemDetail';
 import EquipmentExplorer from './pages/EquipmentExplorer';
@@ -22,12 +21,30 @@ import UserManagement from './pages/UserManagement';
 const DigitalTwin = lazy(() => import('./pages/DigitalTwin'));
 
 function AppContent() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Default to collapsed if viewport is laptop-width (< 1280px) to maximize operational room
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.innerWidth < 1280);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [selectedEquipment, setSelectedEquipment] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [location.pathname]);
+
+  // Window resize listener to intelligently adapt layout
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024 && mobileSidebarOpen) {
+        setMobileSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [mobileSidebarOpen]);
 
   // Master Clock ticker
   useEffect(() => {
@@ -35,19 +52,22 @@ function AppContent() {
     return () => clearInterval(timer);
   }, []);
 
-  // Keyboard Shortcuts (M: Map, A: Alerts, E: Equipment, O: Operator, S: Supervisor, Esc: Close)
+  // Keyboard Shortcuts (M: Map/Command, A: Alerts, E: Equipment, O: Operator, S: Supervisor, Esc: Close)
   useEffect(() => {
     const handler = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
 
       switch (e.key.toLowerCase()) {
         case 'd': navigate('/digital-twin'); break;
-        case 'm': navigate('/map'); break;
+        case 'm': navigate('/'); break;
         case 'a': navigate('/alerts'); break;
         case 'e': navigate('/equipment'); break;
         case 'o': navigate('/operator-mode'); break;
         case 's': navigate('/supervisor-mode'); break;
-        case 'escape': setSelectedEquipment(null); break;
+        case 'escape': 
+          setSelectedEquipment(null);
+          setMobileSidebarOpen(false);
+          break;
       }
     };
     window.addEventListener('keydown', handler);
@@ -62,12 +82,19 @@ function AppContent() {
     setSelectedEquipment(null);
   }, []);
 
+  const handleToggleSidebar = () => {
+    if (window.innerWidth <= 1024) {
+      setMobileSidebarOpen(prev => !prev);
+    } else {
+      setSidebarCollapsed(prev => !prev);
+    }
+  };
+
   const getModuleName = () => {
     const path = location.pathname;
     if (path === '/' || path === '/command-center') return 'Command Center';
     if (path === '/operator-mode') return 'Operator Cockpit';
     if (path === '/supervisor-mode') return 'Supervisor Observability';
-    if (path === '/map') return 'Live Building Map';
     if (path === '/subsystems') return 'Building Subsystems';
     if (path.startsWith('/subsystems/')) return 'Subsystem Detail';
     if (path === '/equipment') return 'Equipment Explorer';
@@ -81,12 +108,22 @@ function AppContent() {
     return 'SCADA Control';
   };
 
+  const isDigitalTwin = location.pathname === '/digital-twin';
+
   return (
     <div className="app-layout">
+      {/* Backdrop for Mobile / Tablet Sidebar Drawer */}
+      <div 
+        className={`sidebar-backdrop ${mobileSidebarOpen ? 'active' : ''}`}
+        onClick={() => setMobileSidebarOpen(false)}
+      />
+
       {/* Left Navigation Sidebar */}
       <Sidebar
         collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        mobileOpen={mobileSidebarOpen}
+        onCloseMobile={() => setMobileSidebarOpen(false)}
+        onToggle={handleToggleSidebar}
       />
 
       {/* Main SCADA Workspace */}
@@ -94,11 +131,14 @@ function AppContent() {
         <Header
           currentTime={currentTime}
           moduleName={getModuleName()}
-          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onToggleSidebar={handleToggleSidebar}
         />
 
-        <div className="app-content-wrapper flex flex-1 overflow-hidden">
-          <div className="app-content flex-1 overflow-y-auto">
+        {/* Top Notification Bar for Active Alarms */}
+        <TopNotificationBar onSelectEquipment={handleSelectEquipment} />
+
+        <div className="app-content-wrapper flex flex-1 overflow-hidden" style={{ position: 'relative' }}>
+          <div className={`app-content flex-1 overflow-y-auto ${isDigitalTwin ? 'full-bleed' : ''}`}>
             <Routes>
               <Route path="/" element={<CommandCenter onSelectEquipment={handleSelectEquipment} />} />
               <Route path="/command-center" element={<CommandCenter onSelectEquipment={handleSelectEquipment} />} />
@@ -106,7 +146,7 @@ function AppContent() {
               <Route path="/operator" element={<OperatorMode onSelectEquipment={handleSelectEquipment} />} />
               <Route path="/supervisor-mode" element={<SupervisorMode />} />
               <Route path="/supervisor" element={<SupervisorMode />} />
-              <Route path="/map" element={<LiveMap onSelectEquipment={handleSelectEquipment} />} />
+              <Route path="/map" element={<Navigate to="/" replace />} />
               <Route path="/subsystems" element={<Subsystems />} />
               <Route path="/subsystems/:id" element={<SubsystemDetail onSelectEquipment={handleSelectEquipment} />} />
               <Route path="/equipment" element={<EquipmentExplorer onSelectEquipment={handleSelectEquipment} />} />
@@ -123,9 +163,6 @@ function AppContent() {
               } />
             </Routes>
           </div>
-
-          {/* Right-Side SCADA Operations Panel */}
-          <OpsPanel />
         </div>
       </div>
 

@@ -44,7 +44,7 @@ export default function WorkOrders() {
       </div>
 
       {/* Summary KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-3)', marginBottom: 'var(--space-5)' }}>
+      <div className="scada-grid-4" style={{ marginBottom: 'var(--space-5)' }}>
         {[
           { label: 'Total Active Orders', count: workOrders.length, color: null },
           { label: 'Critical Priority', count: workOrders.filter(w => w.priority === 'critical').length, color: 'critical' },
@@ -148,7 +148,7 @@ export default function WorkOrders() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-3">
+              <div className="scada-grid-2 mb-3">
                 <div>
                   <label className="text-xs text-tertiary block mb-1">Priority</label>
                   <select 

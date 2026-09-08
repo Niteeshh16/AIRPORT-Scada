@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { User, Sliders, Map, Globe } from 'lucide-react';
+import { User, Sliders, LayoutDashboard, Globe } from 'lucide-react';
 
 export default function ModeSwitcherBar({ activeMode }) {
   const navigate = useNavigate();
@@ -9,12 +9,20 @@ export default function ModeSwitcherBar({ activeMode }) {
   const currentMode = activeMode || (
     location.pathname === '/digital-twin' ? 'twin' :
     location.pathname === '/supervisor-mode' ? 'supervisor' :
-    location.pathname === '/operator-mode' ? 'operator' :
-    location.pathname === '/map' ? 'map' : 'map'
+    location.pathname === '/operator-mode' ? 'operator' : 'cmd'
   );
 
   return (
     <div className="mode-switcher-bar">
+      <button
+        className={`mode-btn ${currentMode === 'cmd' ? 'active' : ''}`}
+        onClick={() => navigate('/')}
+        title="Main Command Center with All-Floor Building Overview"
+      >
+        <LayoutDashboard size={13} />
+        <span>COMMAND CENTER</span>
+      </button>
+
       <button
         className={`mode-btn ${currentMode === 'twin' ? 'active' : ''}`}
         onClick={() => navigate('/digital-twin')}
@@ -23,15 +31,6 @@ export default function ModeSwitcherBar({ activeMode }) {
       >
         <Globe size={13} />
         <span>3D TWIN</span>
-      </button>
-
-      <button
-        className={`mode-btn ${currentMode === 'map' ? 'active' : ''}`}
-        onClick={() => navigate('/map')}
-        title="Terminal Floor Map Grid View"
-      >
-        <Map size={13} />
-        <span>MAP VIEW</span>
       </button>
 
       <button

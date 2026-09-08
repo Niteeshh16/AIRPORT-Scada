@@ -1,19 +1,18 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
-  LayoutDashboard, Map, Layers, Cpu, AlertTriangle,
-  TrendingUp, Wrench, Shield, FileText, Users, Activity, Globe
+  LayoutDashboard, Layers, Cpu, AlertTriangle,
+  TrendingUp, Wrench, Shield, FileText, Users, Activity, Globe, X
 } from 'lucide-react';
 import { useLiveData } from '../context/LiveDataContext';
 
-export default function Sidebar({ collapsed, onToggle }) {
+export default function Sidebar({ collapsed, mobileOpen, onCloseMobile, onToggle }) {
   const { alerts, subsystems } = useLiveData();
   const unackAlerts = alerts.filter(a => !a.acknowledged).length;
 
   const mainNav = [
     { to: '/', label: 'Command Center', icon: LayoutDashboard },
     { to: '/digital-twin', label: '3D Digital Twin', icon: Globe, tag: '3D TWIN' },
-    { to: '/map', label: 'Live Building Map', icon: Map },
     { to: '/subsystems', label: 'Building Subsystems', icon: Layers },
     { to: '/equipment', label: 'Equipment Explorer', icon: Cpu },
     { to: '/alerts', label: 'Alerts & Events', icon: AlertTriangle, badge: unackAlerts },
@@ -40,16 +39,28 @@ export default function Sidebar({ collapsed, onToggle }) {
   };
 
   return (
-    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`} style={{ overflowX: 'hidden' }}>
+    <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`} style={{ overflowX: 'hidden' }}>
       {/* Brand Header */}
-      <div className="sidebar-header">
-        <div className="sidebar-logo">
-          <Activity size={18} />
+      <div className="sidebar-header" style={{ justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', minWidth: 0 }}>
+          <div className="sidebar-logo">
+            <Activity size={18} />
+          </div>
+          <div className="sidebar-brand">
+            <span className="sidebar-brand-name font-mono">LONG THANH SCADA</span>
+            <span className="sidebar-brand-sub">HBMS CONTROL ROOM</span>
+          </div>
         </div>
-        <div className="sidebar-brand">
-          <span className="sidebar-brand-name font-mono">LONG THANH SCADA</span>
-          <span className="sidebar-brand-sub">HBMS CONTROL ROOM</span>
-        </div>
+        {mobileOpen && (
+          <button 
+            className="btn btn-ghost btn-sm" 
+            onClick={onCloseMobile}
+            style={{ padding: '4px', color: 'var(--text-tertiary)' }}
+            title="Close Menu"
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
 
       {/* Navigation List */}

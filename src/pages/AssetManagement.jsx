@@ -45,7 +45,7 @@ export default function AssetManagement({ onSelectEquipment }) {
       </div>
 
       {/* KPI Cards Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-3)', marginBottom: 'var(--space-5)' }}>
+      <div className="scada-grid-4" style={{ marginBottom: 'var(--space-5)' }}>
         <div className="kpi-card teal">
           <div className="kpi-label">Total Registered Assets</div>
           <div className="kpi-value teal font-mono">{equipmentList.length}</div>

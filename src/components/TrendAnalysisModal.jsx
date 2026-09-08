@@ -4,13 +4,13 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianG
 import { TREND_DATA } from '../data/mockData';
 
 export default function TrendAnalysisModal({ isOpen, onClose }) {
-  if (!isOpen) return null;
-
   const [range, setRange] = useState('24H');
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState('1x');
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState(28);
+
+  if (!isOpen) return null;
 
   const kpiStats = [
     { label: 'CURRENT', value: '97.1%', color: '#f5a623' },

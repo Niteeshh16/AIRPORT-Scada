@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Activity, AlertTriangle, CheckCircle2, Zap, Server,
   Layers, ArrowRight, ShieldCheck, Clock, Wind, Flame,
-  Package, DoorOpen, ScanLine, Thermometer, Fan, Globe
+  Package, DoorOpen, ScanLine, Thermometer, Fan, Globe, ArrowLeft, Maximize2
 } from 'lucide-react';
 import { useLiveData } from '../context/LiveDataContext';
 import FloorMap from '../components/FloorMap';
-import FloatingAlerts from '../components/FloatingAlerts';
+import MultiFloorMapGrid from '../components/MultiFloorMapGrid';
 import { useNavigate } from 'react-router-dom';
 
 const sysIcons = {
@@ -24,9 +24,14 @@ const sysIcons = {
   'IASS': Activity,
 };
 
+const ALL_FLOORS = ['PIT', 'GF', '1F', '2F', '3F', '4F'];
+
 export default function CommandCenter({ onSelectEquipment }) {
-  const { subsystems, alerts, workOrders, equipmentList, selectedFloor } = useLiveData();
+  const { subsystems, alerts, workOrders, equipmentList, selectedFloor, setSelectedFloor } = useLiveData();
   const navigate = useNavigate();
+
+  // Mode to toggle between All Floors at once (default) and Single Floor Focus
+  const [mapViewMode, setMapViewMode] = useState('all'); // 'all' | 'single'
 
   // Core SCADA metrics
   const totalEquipment = equipmentList.length;
@@ -36,97 +41,138 @@ export default function CommandCenter({ onSelectEquipment }) {
   const totalPower = equipmentList.reduce((acc, curr) => acc + (curr.power || 0), 0).toFixed(1);
 
   return (
-    <div className="command-center animate-fadeIn" style={{ display: 'flex', gap: '16px', position: 'relative', width: '100%', alignItems: 'flex-start' }}>
+    <div className="command-center animate-fadeIn scada-command-center-layout full-screen-mode">
       
-      {/* Main SCADA Operations Left Column */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, minWidth: 0 }}>
-        
-        {/* 1. Sleek, Compact SCADA Metric Bar with Generous 16px Gaps */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+      {/* 1. Sleek, Compact SCADA Metric Bar Across Full Width */}
+      <div className="scada-kpi-grid">
         {/* System Health */}
-        <div className="card" style={{ padding: '10px 14px', borderLeft: '3px solid var(--accent-teal)', background: 'var(--bg-surface)' }}>
+        <div className="card scada-kpi-card" style={{ borderLeft: '3px solid var(--accent-teal)' }}>
           <div className="flex items-center justify-between">
             <span className="text-3xs font-mono font-bold text-tertiary uppercase tracking-wider">System Health</span>
-            <div style={{ width: 22, height: 22, borderRadius: '4px', background: 'var(--status-operational-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-teal)' }}>
-              <ShieldCheck size={13} />
+            <div className="kpi-icon-pill teal">
+              <ShieldCheck size={14} />
             </div>
           </div>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="font-mono text-base font-bold text-teal">98.4%</span>
+            <span className="font-mono text-xl font-bold text-teal">98.4%</span>
             <span className="text-3xs text-secondary font-mono">● All DDCs Online</span>
           </div>
         </div>
 
-        {/* Assets Monitored */}
-        <div className="card" style={{ padding: '10px 14px', borderLeft: '3px solid var(--accent-blue)', background: 'var(--bg-surface)' }}>
+        {/* Monitored Fleet */}
+        <div className="card scada-kpi-card" style={{ borderLeft: '3px solid var(--accent-blue)' }}>
           <div className="flex items-center justify-between">
-            <span className="text-3xs font-mono font-bold text-tertiary uppercase tracking-wider">Monitored Assets</span>
-            <div style={{ width: 22, height: 22, borderRadius: '4px', background: 'var(--status-info-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-blue)' }}>
-              <Server size={13} />
+            <span className="text-3xs font-mono font-bold text-tertiary uppercase tracking-wider">Monitored Fleet</span>
+            <div className="kpi-icon-pill blue">
+              <Server size={14} />
             </div>
           </div>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="font-mono text-base font-bold text-primary">{totalEquipment}</span>
+            <span className="font-mono text-xl font-bold text-primary">
+              {subsystems.reduce((acc, s) => acc + s.total, 0).toLocaleString()}
+            </span>
             <span className="text-3xs text-secondary font-mono">
-              <strong className="text-teal">{operationalCount} OK</strong> • {criticalCount} Fault
+              <strong className="text-teal">13 Subsystems</strong> • 3,476 Online
             </span>
           </div>
         </div>
 
         {/* Active Alerts */}
-        <div className="card" style={{ padding: '10px 14px', borderLeft: '3px solid var(--status-critical)', background: 'var(--bg-surface)' }}>
+        <div className="card scada-kpi-card" style={{ borderLeft: '3px solid var(--status-critical)' }}>
           <div className="flex items-center justify-between">
             <span className="text-3xs font-mono font-bold text-tertiary uppercase tracking-wider">Active Alerts</span>
-            <div style={{ width: 22, height: 22, borderRadius: '4px', background: 'var(--status-critical-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--status-critical)' }}>
-              <AlertTriangle size={13} />
+            <div className="kpi-icon-pill red">
+              <AlertTriangle size={14} />
             </div>
           </div>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="font-mono text-base font-bold text-red">{alerts.length}</span>
+            <span className="font-mono text-xl font-bold text-red">{alerts.length}</span>
             <span className="text-3xs text-secondary font-mono">
               {alerts.filter(a => a.severity === 'critical').length} Critical • {alerts.filter(a => a.severity === 'high').length} High
             </span>
           </div>
         </div>
 
-        {/* Substation Load */}
-        <div className="card" style={{ padding: '10px 14px', borderLeft: '3px solid var(--status-warning)', background: 'var(--bg-surface)' }}>
+        {/* Substation Incomer Load */}
+        <div className="card scada-kpi-card" style={{ borderLeft: '3px solid var(--status-warning)' }}>
           <div className="flex items-center justify-between">
-            <span className="text-3xs font-mono font-bold text-tertiary uppercase tracking-wider">Substation Power</span>
-            <div style={{ width: 22, height: 22, borderRadius: '4px', background: 'var(--status-warning-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--status-warning)' }}>
-              <Zap size={13} />
+            <span className="text-3xs font-mono font-bold text-tertiary uppercase tracking-wider">Grid Incomer Load</span>
+            <div className="kpi-icon-pill amber">
+              <Zap size={14} />
             </div>
           </div>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="font-mono text-base font-bold text-amber">{totalPower} kW</span>
-            <span className="text-3xs text-secondary font-mono">Demand Nominal</span>
+            <span className="font-mono text-xl font-bold text-amber">24.8 MVA</span>
+            <span className="text-3xs text-secondary font-mono">32.5 MVA Cap • cos φ 0.98</span>
           </div>
         </div>
       </div>
 
-      {/* 2. Wide, Expansive Long Thanh Lotus Floor Map (Center Stage) */}
-      <div className="card" style={{ border: '1px solid var(--border-default)', overflow: 'hidden', width: '100%' }}>
-        <div className="card-header flex justify-between items-center py-2 px-4">
-          <div className="flex items-center gap-2">
-            <Layers size={15} className="text-teal" />
-            <span className="card-title font-mono text-xs uppercase font-bold tracking-wide">
-              LONG THANH INTERNATIONAL AIRPORT — TERMINAL 1 SCADA SPATIAL BLUEPRINT
+      {/* 2. Full-Screen Terminal 1 Spatial Blueprint Stage */}
+      <div className="card scada-blueprint-card" style={{ width: '100%', overflow: 'hidden' }}>
+        
+        {/* Blueprint Control Toolbar */}
+        <div className="scada-blueprint-toolbar">
+          {/* Left: Title and Live Status */}
+          <div className="flex items-center gap-2 min-w-0">
+            <Layers size={16} className="text-teal shrink-0" />
+            <span className="font-mono text-xs uppercase font-bold tracking-wide text-primary truncate">
+              TERMINAL 1 SPATIAL BLUEPRINT — {mapViewMode === 'all' ? 'ALL 6 FLOORS COMPLETE OVERVIEW' : `SINGLE FLOOR FOCUS (${selectedFloor})`}
             </span>
+            <span className="live-dot-badge green shrink-0" title="Live Continuous Telemetry Stream" />
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-2xs text-secondary font-mono">
-              Interactive Node Explorer • Click floor tabs or devices to inspect & control
-            </span>
+
+          {/* Center / Right Controls: Floor Switcher Tabs & View Mode */}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            
+            {/* Quick Floor Selector Tabs */}
+            <div className="floor-quick-tabs">
+              <button
+                className={`floor-tab-btn ${mapViewMode === 'all' ? 'active' : ''}`}
+                onClick={() => setMapViewMode('all')}
+                title="Display all 6 terminal levels at once"
+              >
+                ALL FLOORS
+              </button>
+              {ALL_FLOORS.map(floorId => (
+                <button
+                  key={floorId}
+                  className={`floor-tab-btn ${mapViewMode === 'single' && selectedFloor === floorId ? 'active' : ''}`}
+                  onClick={() => {
+                    setSelectedFloor(floorId);
+                    setMapViewMode('single');
+                  }}
+                  title={`Focus on ${floorId} level`}
+                >
+                  {floorId}
+                </button>
+              ))}
+            </div>
+
+            {/* Back to All Floors quick button when in single view */}
+            {mapViewMode === 'single' && (
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setMapViewMode('all')}
+                style={{ fontSize: '11px', padding: '3px 10px', height: 26, display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                <ArrowLeft size={12} />
+                <span>All 6 Floors</span>
+              </button>
+            )}
+
+            {/* 3D Digital Twin shortcut */}
             <button
               className="btn btn-secondary btn-sm"
               onClick={() => navigate('/digital-twin')}
               style={{
                 fontSize: '11px',
                 padding: '3px 10px',
+                height: 26,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                background: 'rgba(56, 189, 248, 0.14)',
+                background: 'rgba(56, 189, 248, 0.12)',
                 border: '1px solid rgba(56, 189, 248, 0.35)',
                 color: '#38bdf8',
                 fontWeight: 700,
@@ -135,25 +181,42 @@ export default function CommandCenter({ onSelectEquipment }) {
               }}
             >
               <Globe size={13} />
-              <span>3D Digital Twin →</span>
+              <span>3D Twin →</span>
             </button>
           </div>
         </div>
 
-        <div style={{ background: '#070a10', width: '100%' }}>
-          <FloorMap
-            height={560}
-            onSelectEquipment={onSelectEquipment}
-            showControls={true}
-          />
+        {/* Blueprint Content Stage: All 6 Floors filling the screen or Single Focus */}
+        <div className="scada-blueprint-body">
+          {mapViewMode === 'all' ? (
+            <div className="p-3 bg-black w-full">
+              <MultiFloorMapGrid
+                selectedFloor={selectedFloor}
+                onSelectFloor={(floorId) => {
+                  setSelectedFloor(floorId);
+                  setMapViewMode('single');
+                }}
+                fullView={true}
+              />
+            </div>
+          ) : (
+            <FloorMap
+              height="clamp(440px, 60vh, 720px)"
+              onSelectEquipment={onSelectEquipment}
+              selectedFloor={selectedFloor}
+              showControls={true}
+            />
+          )}
         </div>
       </div>
 
-      {/* 3. Full-Width 12 Building Subsystems Grid (Spacious & Clean) */}
+      {/* 3. Building Subsystems Fleet Grid (13 Subsystems Full Width) */}
       <div className="card p-3.5" style={{ width: '100%' }}>
         <div className="card-header py-1 px-2 mb-3 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <span className="card-title font-mono text-xs uppercase font-bold text-primary">Building Subsystems (12)</span>
+            <span className="card-title font-mono text-xs uppercase font-bold text-primary">
+              Building Subsystems Directory (13 Subsystems)
+            </span>
             <span className="live-dot-badge" style={{ width: 6, height: 6 }} />
           </div>
           <button
@@ -165,7 +228,7 @@ export default function CommandCenter({ onSelectEquipment }) {
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '10px' }}>
+        <div className="scada-subsystems-grid">
           {subsystems.map(sys => {
             const isCritical = sys.critical > 0;
             const isWarning = sys.warnings > 0 && !isCritical;
@@ -179,7 +242,7 @@ export default function CommandCenter({ onSelectEquipment }) {
                 style={{
                   padding: '10px 12px',
                   borderRadius: '8px',
-                  background: 'linear-gradient(145deg, #121622 0%, #0c1018 100%)',
+                  background: 'linear-gradient(145deg, #10141e 0%, #0a0e16 100%)',
                   border: `1px solid rgba(255, 255, 255, 0.08)`,
                   borderLeft: `3.5px solid ${statusColor}`,
                   cursor: 'pointer',
@@ -229,13 +292,6 @@ export default function CommandCenter({ onSelectEquipment }) {
             );
           })}
         </div>
-      </div>
-      
-      </div> {/* End Main Left Column */}
-
-      {/* Right Side Notification Area */}
-      <div style={{ width: '360px', flexShrink: 0 }}>
-        <FloatingAlerts />
       </div>
 
     </div>

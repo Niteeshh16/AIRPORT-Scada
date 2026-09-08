@@ -1,21 +1,41 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Bell, Menu, Terminal, Sun, Moon, Shield, Wifi,
-  Layers, Clock, RefreshCw
+  Layers, Clock, RefreshCw, AlertTriangle, AlertOctagon, Check, ArrowRight, X
 } from 'lucide-react';
 import { useLiveData } from '../context/LiveDataContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Header({ currentTime, moduleName, onToggleSidebar }) {
-  const { alerts, opsPanelOpen, setOpsPanelOpen } = useLiveData();
+  const { alerts, acknowledgeAlert } = useLiveData();
+  const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
 
   const timeStr = currentTime.toLocaleTimeString('en-US', {
     hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
   });
-  const dateStr = currentTime.toLocaleDateString('en-US', {
-    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
-  });
 
-  const criticalAlerts = alerts.filter(a => a.severity === 'critical' && !a.acknowledged);
+  const unacknowledgedAlerts = alerts.filter(a => !a.acknowledged);
+  const criticalCount = unacknowledgedAlerts.filter(a => a.severity === 'critical').length;
+  const totalUnack = unacknowledgedAlerts.length;
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setNotifDropdownOpen(false);
+      }
+    }
+    if (notifDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [notifDropdownOpen]);
+
+  const handleAckAll = () => {
+    unacknowledgedAlerts.forEach(a => acknowledgeAlert(a.id));
+  };
 
   return (
     <header className="app-header">
@@ -34,8 +54,8 @@ export default function Header({ currentTime, moduleName, onToggleSidebar }) {
         <span className="header-module-name font-mono">{moduleName}</span>
       </div>
 
-      {/* Right: Protocol status + Clock + Ops Desk + Profile */}
-      <div className="header-right">
+      {/* Right: Protocol status + Clock + Notifications Bell + Profile */}
+      <div className="header-right" style={{ position: 'relative' }}>
         {/* Network & Protocol Status */}
         <div className="header-status live">
           <span className="status-dot" />
@@ -47,20 +67,104 @@ export default function Header({ currentTime, moduleName, onToggleSidebar }) {
           <span>{timeStr}</span>
         </div>
 
-        {/* Ops Desk Toggle Button */}
-        <button
-          className="header-icon-btn"
-          onClick={() => setOpsPanelOpen(!opsPanelOpen)}
-          title="Toggle Operations Desk & Logs"
-          style={{ background: opsPanelOpen ? 'var(--bg-active)' : 'transparent', color: opsPanelOpen ? 'var(--accent-teal)' : 'inherit' }}
-        >
-          <Terminal size={17} />
-          {criticalAlerts.length > 0 && (
-            <span className="notification-badge">
-              {criticalAlerts.length}
-            </span>
+        {/* Top Notifications Bell Button & Dropdown Anchor */}
+        <div ref={dropdownRef} style={{ position: 'relative' }}>
+          <button
+            className={`header-icon-btn ${notifDropdownOpen ? 'active' : ''}`}
+            onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
+            title="System Alarms & Notifications"
+            style={{
+              position: 'relative',
+              background: notifDropdownOpen ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
+              color: notifDropdownOpen ? '#38bdf8' : totalUnack > 0 ? '#f87171' : 'inherit'
+            }}
+          >
+            <Bell size={17} className={criticalCount > 0 ? 'pulse-fast' : ''} />
+            {totalUnack > 0 && (
+              <span className={`notification-badge ${criticalCount > 0 ? 'critical' : ''}`}>
+                {totalUnack}
+              </span>
+            )}
+          </button>
+
+          {/* Top Notifications Dropdown Panel */}
+          {notifDropdownOpen && (
+            <div className="top-notif-dropdown animate-fadeIn">
+              <div className="top-notif-dropdown-header">
+                <div className="flex items-center gap-2">
+                  <Bell size={14} className="text-teal" />
+                  <span className="font-mono text-xs font-bold uppercase tracking-wider text-primary">
+                    ACTIVE ALARMS ({totalUnack})
+                  </span>
+                </div>
+                {totalUnack > 0 && (
+                  <button
+                    onClick={handleAckAll}
+                    className="text-3xs font-mono text-teal hover:underline flex items-center gap-1"
+                  >
+                    <Check size={11} />
+                    <span>Ack All</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="top-notif-dropdown-body">
+                {unacknowledgedAlerts.length === 0 ? (
+                  <div className="p-4 text-center text-tertiary text-xs">
+                    All alarms cleared and acknowledged.
+                  </div>
+                ) : (
+                  unacknowledgedAlerts.slice(0, 6).map(alert => (
+                    <div
+                      key={alert.id}
+                      className={`top-notif-dropdown-item ${alert.severity}`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className={`status-badge ${alert.severity}`} style={{ fontSize: '8px', padding: '1px 5px' }}>
+                            {alert.severity.toUpperCase()}
+                          </span>
+                          <span className="font-mono text-xs font-bold text-teal truncate">
+                            {alert.equipment}
+                          </span>
+                        </div>
+                        <span className="text-3xs font-mono text-tertiary shrink-0">{alert.time}</span>
+                      </div>
+
+                      <div className="text-2xs text-secondary mt-1 line-clamp-2">
+                        {alert.message}
+                      </div>
+
+                      <div className="flex justify-end gap-2 mt-2">
+                        <button
+                          onClick={() => acknowledgeAlert(alert.id)}
+                          className="btn btn-secondary btn-xs"
+                          style={{ fontSize: '10px', padding: '2px 8px', height: 22 }}
+                        >
+                          <Check size={11} />
+                          <span>Acknowledge</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="top-notif-dropdown-footer">
+                <button
+                  onClick={() => {
+                    setNotifDropdownOpen(false);
+                    navigate('/alerts');
+                  }}
+                  className="w-full text-center text-xs font-mono text-teal hover:underline flex items-center justify-center gap-1.5 py-1"
+                >
+                  <span>Open Alarm Management Center</span>
+                  <ArrowRight size={12} />
+                </button>
+              </div>
+            </div>
           )}
-        </button>
+        </div>
 
         {/* Profile User Avatar */}
         <div className="header-user">

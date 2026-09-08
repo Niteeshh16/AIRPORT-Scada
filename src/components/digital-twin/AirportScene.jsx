@@ -13,9 +13,9 @@ import ObjectInfoPanel from './ObjectInfoPanel';
 
 // ── Camera config — aerial telephoto like reference images ───────────────────
 // ── Camera config — elevated aerial view matching real airport photo ────────
-const CAM_POS    = [0, 54, 36];
-const CAM_TARGET = [0, 0, -8];
-const CAM_FOV    = 42;
+const CAM_POS = [0, 52, 40];
+const CAM_TARGET = [0, 1, 0];
+const CAM_FOV = 44;
 
 function RunwayLightRow({ x, count = 14 }) {
   const refs = useRef([]);
@@ -58,52 +58,52 @@ function PAPILights({ x, z }) {
 const GATE_DATA = [
   // 1. North Pier Gates (Dual rows along the wide central pier)
   { id: 'N31', pos: [-5.8, 0, -12], rot: -Math.PI / 2, status: 'boarding' },
-  { id: 'N32', pos: [ 5.8, 0, -12], rot:  Math.PI / 2, status: 'operational' },
+  { id: 'N32', pos: [5.8, 0, -12], rot: Math.PI / 2, status: 'operational' },
   { id: 'N33', pos: [-5.8, 0, -18], rot: -Math.PI / 2, status: 'operational' },
-  { id: 'N34', pos: [ 5.8, 0, -18], rot:  Math.PI / 2, status: 'warning' },
+  { id: 'N34', pos: [5.8, 0, -18], rot: Math.PI / 2, status: 'warning' },
   { id: 'N35', pos: [-5.8, 0, -24], rot: -Math.PI / 2, status: 'operational' },
-  { id: 'N36', pos: [ 5.8, 0, -24], rot:  Math.PI / 2, status: 'operational' },
+  { id: 'N36', pos: [5.8, 0, -24], rot: Math.PI / 2, status: 'operational' },
   // North Pier Hammerhead End Gates
-  { id: 'N37', pos: [-7.5, 0, -34.5], rot: Math.PI,    status: 'operational' },
-  { id: 'N38', pos: [ 0.0, 0, -35.5], rot: Math.PI,    status: 'boarding' },
-  { id: 'N39', pos: [ 7.5, 0, -34.5], rot: Math.PI,    status: 'operational' },
+  { id: 'N37', pos: [-7.5, 0, -34.5], rot: Math.PI, status: 'operational' },
+  { id: 'N38', pos: [0.0, 0, -35.5], rot: Math.PI, status: 'boarding' },
+  { id: 'N39', pos: [7.5, 0, -34.5], rot: Math.PI, status: 'operational' },
 
   // 2. West Wing Gates (Wide sweeping concourse)
-  { id: 'W11', pos: [-16.5, 0,  -3.5], rot: -Math.PI / 3.5, status: 'critical' },
-  { id: 'W12', pos: [-21.2, 0,  -6.2], rot: -Math.PI / 3.5, status: 'operational' },
-  { id: 'W13', pos: [-25.8, 0,  -8.8], rot: -Math.PI / 3.5, status: 'operational' },
-  { id: 'W14', pos: [-19.0, 0,   2.5], rot:  Math.PI / 1.5, status: 'operational' },
-  { id: 'W15', pos: [-23.5, 0,  -0.2], rot:  Math.PI / 1.5, status: 'warning' },
+  { id: 'W11', pos: [-16.5, 0, -3.5], rot: -Math.PI / 3.5, status: 'critical' },
+  { id: 'W12', pos: [-21.2, 0, -6.2], rot: -Math.PI / 3.5, status: 'operational' },
+  { id: 'W13', pos: [-25.8, 0, -8.8], rot: -Math.PI / 3.5, status: 'operational' },
+  { id: 'W14', pos: [-19.0, 0, 2.5], rot: Math.PI / 1.5, status: 'operational' },
+  { id: 'W15', pos: [-23.5, 0, -0.2], rot: Math.PI / 1.5, status: 'warning' },
   // West Wing Hammerhead Tip
-  { id: 'W16', pos: [-32.5, 0, -12.5], rot: -Math.PI / 3,   status: 'boarding' },
+  { id: 'W16', pos: [-32.5, 0, -12.5], rot: -Math.PI / 3, status: 'boarding' },
 
   // 3. East Wing Gates (Wide sweeping concourse)
-  { id: 'E21', pos: [ 16.5, 0,  -3.5], rot:  Math.PI / 3.5, status: 'operational' },
-  { id: 'E22', pos: [ 21.2, 0,  -6.2], rot:  Math.PI / 3.5, status: 'boarding' },
-  { id: 'E23', pos: [ 25.8, 0,  -8.8], rot:  Math.PI / 3.5, status: 'operational' },
-  { id: 'E24', pos: [ 19.0, 0,   2.5], rot: -Math.PI / 1.5, status: 'operational' },
-  { id: 'E25', pos: [ 23.5, 0,  -0.2], rot: -Math.PI / 1.5, status: 'offline' },
+  { id: 'E21', pos: [16.5, 0, -3.5], rot: Math.PI / 3.5, status: 'operational' },
+  { id: 'E22', pos: [21.2, 0, -6.2], rot: Math.PI / 3.5, status: 'boarding' },
+  { id: 'E23', pos: [25.8, 0, -8.8], rot: Math.PI / 3.5, status: 'operational' },
+  { id: 'E24', pos: [19.0, 0, 2.5], rot: -Math.PI / 1.5, status: 'operational' },
+  { id: 'E25', pos: [23.5, 0, -0.2], rot: -Math.PI / 1.5, status: 'offline' },
   // East Wing Hammerhead Tip
-  { id: 'E26', pos: [ 32.5, 0, -12.5], rot:  Math.PI / 3,   status: 'operational' },
+  { id: 'E26', pos: [32.5, 0, -12.5], rot: Math.PI / 3, status: 'operational' },
 ];
 
 // ── Parked Aircraft docked at Wide Concourse Gates ──────────────────────────
 const AIRCRAFT_DATA = [
   // North Pier Aircraft (Dual sides)
-  { id: 'VN-A891', flight: 'VN218',  pos: [-8.4, 0.1, -12],   rot:  Math.PI / 2, status: 'boarding',    time: '17:15' },
-  { id: 'VN-A350', flight: 'VN019',  pos: [ 8.4, 0.1, -18],   rot: -Math.PI / 2, status: 'operational', time: '17:40' },
-  { id: 'VN-A787', flight: 'VN502',  pos: [-8.4, 0.1, -24],   rot:  Math.PI / 2, status: 'warning',     time: '18:00' },
-  { id: 'VN-A990', flight: 'VN101',  pos: [ 0.0, 0.1, -38.5], rot:  0,           status: 'boarding',    time: '17:30' },
+  { id: 'VN-A891', flight: 'VN218', pos: [-8.4, 0.1, -12], rot: Math.PI / 2, status: 'boarding', time: '17:15' },
+  { id: 'VN-A350', flight: 'VN019', pos: [8.4, 0.1, -18], rot: -Math.PI / 2, status: 'operational', time: '17:40' },
+  { id: 'VN-A787', flight: 'VN502', pos: [-8.4, 0.1, -24], rot: Math.PI / 2, status: 'warning', time: '18:00' },
+  { id: 'VN-A990', flight: 'VN101', pos: [0.0, 0.1, -38.5], rot: 0, status: 'boarding', time: '17:30' },
 
   // West Wing Aircraft (Inner & Outer Apron)
-  { id: 'QH-A321', flight: 'QH240',  pos: [-24.5, 0.1, -10.5], rot: Math.PI / 5,  status: 'critical',    time: '16:50' },
-  { id: 'VN-A682', flight: 'VN620',  pos: [-22.5, 0.1,   4.5], rot: -Math.PI / 3, status: 'operational', time: '18:15' },
-  { id: 'VJ-A330', flight: 'VJ081',  pos: [-35.0, 0.1, -15.5], rot: Math.PI / 4,  status: 'boarding',    time: '17:10' },
+  { id: 'QH-A321', flight: 'QH240', pos: [-24.5, 0.1, -10.5], rot: Math.PI / 5, status: 'critical', time: '16:50' },
+  { id: 'VN-A682', flight: 'VN620', pos: [-22.5, 0.1, 4.5], rot: -Math.PI / 3, status: 'operational', time: '18:15' },
+  { id: 'VJ-A330', flight: 'VJ081', pos: [-35.0, 0.1, -15.5], rot: Math.PI / 4, status: 'boarding', time: '17:10' },
 
   // East Wing Aircraft (Inner & Outer Apron)
-  { id: 'VN-A320', flight: 'VN782',  pos: [ 24.5, 0.1, -10.5], rot: -Math.PI / 5, status: 'operational', time: '17:50' },
-  { id: 'QH-A888', flight: 'QH512',  pos: [ 22.5, 0.1,   4.5], rot:  Math.PI / 3, status: 'operational', time: '18:25' },
-  { id: 'VN-A925', flight: 'VN338',  pos: [ 35.0, 0.1, -15.5], rot: -Math.PI / 4, status: 'operational', time: '18:40' },
+  { id: 'VN-A320', flight: 'VN782', pos: [24.5, 0.1, -10.5], rot: -Math.PI / 5, status: 'operational', time: '17:50' },
+  { id: 'QH-A888', flight: 'QH512', pos: [22.5, 0.1, 4.5], rot: Math.PI / 3, status: 'operational', time: '18:25' },
+  { id: 'VN-A925', flight: 'VN338', pos: [35.0, 0.1, -15.5], rot: -Math.PI / 4, status: 'operational', time: '18:40' },
 ];
 
 // ── Animated Taxiing Aircraft ───────────────────────────────────────────────
@@ -141,11 +141,11 @@ function CameraController({ controlsRef, onLoad }) {
 function SceneLighting() {
   return (
     <>
-      <ambientLight intensity={0.55} color="#d4e8ff" />
+      <ambientLight intensity={0.7} color="#f0f6ff" />
       <directionalLight
-        position={[25, 35, 20]}
-        intensity={2.2}
-        color="#fff8f0"
+        position={[15, 42, 25]}
+        intensity={2.6}
+        color="#ffffff"
         castShadow
         shadow-mapSize={[4096, 4096]}
         shadow-camera-near={1}
@@ -156,9 +156,11 @@ function SceneLighting() {
         shadow-camera-bottom={-60}
         shadow-bias={-0.0003}
       />
-      <hemisphereLight skyColor="#99ccff" groundColor="#223322" intensity={0.5} />
+      {/* Front daylight fill to illuminate the lotus petals and crystal atrium */}
+      <directionalLight position={[-10, 35, 35]} intensity={1.4} color="#f8fafc" />
+      <hemisphereLight skyColor="#bae6fd" groundColor="#1e293b" intensity={0.65} />
       {/* Terminal accent fill */}
-      <pointLight position={[0, 12, 0]} color="#6ab4ff" intensity={4} distance={40} decay={2} />
+      <pointLight position={[0, 14, 0]} color="#38bdf8" intensity={5} distance={45} decay={2} />
       {/* Apron floodlights */}
       {[[-20, 8, -5], [20, 8, -5], [-20, 8, 8], [20, 8, 8]].map((p, i) => (
         <pointLight key={i} position={p} color="#fff5e0" intensity={3} distance={30} decay={2} />
@@ -183,11 +185,11 @@ function RunwayMarkers() {
       {/* Edge lights */}
       <RunwayLightRow x={-22} count={13} />
       <RunwayLightRow x={-17} count={13} />
-      <RunwayLightRow x={17}  count={13} />
-      <RunwayLightRow x={22}  count={13} />
+      <RunwayLightRow x={17} count={13} />
+      <RunwayLightRow x={22} count={13} />
       {/* PAPI */}
       <PAPILights x={-22.5} z={-25} />
-      <PAPILights x={17.5}  z={-25} />
+      <PAPILights x={17.5} z={-25} />
     </group>
   );
 }

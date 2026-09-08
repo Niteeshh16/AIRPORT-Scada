@@ -18,7 +18,7 @@ function TopBar({ currentTime, alerts }) {
   const criticalCount = alerts.filter(a => a.severity === 'critical').length;
   return (
     <div style={{
-      height: 52,
+      minHeight: 52,
       background: 'rgba(3, 6, 14, 0.98)',
       borderBottom: '1px solid rgba(56,189,248,0.18)',
       display: 'flex',
@@ -27,6 +27,7 @@ function TopBar({ currentTime, alerts }) {
       gap: 12,
       flexShrink: 0,
       zIndex: 200,
+      overflowX: 'auto',
     }}>
       {/* Identity */}
       <div style={{ borderRight: '1px solid rgba(255,255,255,0.08)', paddingRight: 14, marginRight: 4, flexShrink: 0 }}>
@@ -47,14 +48,14 @@ function TopBar({ currentTime, alerts }) {
         <span style={{ fontSize: 10, color: '#6b7280', fontFamily: 'monospace' }}>Wind: 12kt NE • VIS: 10km</span>
       </div>
 
-      <div style={{ flex: 1 }} />
+      <div style={{ flex: 1, minWidth: 10 }} />
 
       {/* Search */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 7, padding: '5px 10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 7, padding: '5px 10px', flexShrink: 0 }}>
         <Search size={12} color="#6b7280" />
         <input
           placeholder="Search gates, flights, areas..."
-          style={{ background: 'none', border: 'none', outline: 'none', color: '#e2e8f0', fontSize: 11, fontFamily: 'monospace', width: 170 }}
+          style={{ background: 'none', border: 'none', outline: 'none', color: '#e2e8f0', fontSize: 11, fontFamily: 'monospace', width: 140 }}
         />
       </div>
 
@@ -69,7 +70,7 @@ function TopBar({ currentTime, alerts }) {
       </div>
 
       {/* Alerts bell */}
-      <button style={{ position: 'relative', background: criticalCount > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${criticalCount > 0 ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.09)'}`, borderRadius: 7, padding: '6px 8px', cursor: 'pointer', color: criticalCount > 0 ? '#ef4444' : '#6b7280', display: 'flex', alignItems: 'center' }}>
+      <button style={{ position: 'relative', background: criticalCount > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${criticalCount > 0 ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.09)'}`, borderRadius: 7, padding: '6px 8px', cursor: 'pointer', color: criticalCount > 0 ? '#ef4444' : '#6b7280', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
         <Bell size={14} />
         {criticalCount > 0 && (
           <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: '#ef4444', fontSize: 9, fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace' }}>{criticalCount}</span>
@@ -91,7 +92,7 @@ function StatsStrip({ equipmentList }) {
     { label: 'SCADA Assets', value: `${equipmentList.length} Online`, color: '#22d3a5' },
   ];
   return (
-    <div style={{ height: 34, background: 'rgba(3,6,14,0.96)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', flexShrink: 0, overflow: 'hidden' }}>
+    <div style={{ height: 34, background: 'rgba(3,6,14,0.96)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', flexShrink: 0, overflowX: 'auto', overflowY: 'hidden' }}>
       {stats.map((s, i) => (
         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0 14px', borderRight: '1px solid rgba(255,255,255,0.05)', whiteSpace: 'nowrap', flexShrink: 0 }}>
           <span style={{ fontSize: 9, color: '#4b5563', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 0.5 }}>{s.label}</span>
