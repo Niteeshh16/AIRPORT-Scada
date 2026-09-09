@@ -1,25 +1,18 @@
 import React, { useState } from 'react';
-import { Search, BookOpen, FileText, Download, Plus, CheckCircle2, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
+import {
+  Search, BookOpen, FileText, Download, Plus, CheckCircle2,
+  ChevronDown, ChevronUp, ArrowRight, ShieldAlert, Clock, Check
+} from 'lucide-react';
 import { SOP_DATA } from '../data/mockData';
 
-const CATEGORY_COLORS = {
-  'Fire Safety':    { color: '#ef4444', bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.3)' },
-  'HVAC':           { color: '#38bdf8', bg: 'rgba(56,189,248,0.12)', border: 'rgba(56,189,248,0.3)' },
-  'Security':       { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)' },
-  'BHS':            { color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', border: 'rgba(167,139,250,0.3)' },
-  'Power':          { color: '#f97316', bg: 'rgba(249,115,22,0.12)', border: 'rgba(249,115,22,0.3)' },
-  'Emergency':      { color: '#ef4444', bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.3)' },
-};
-const defaultCat = { color: '#00d4aa', bg: 'rgba(0,212,170,0.12)', border: 'rgba(0,212,170,0.3)' };
-
 const PIPELINE_STEPS = [
-  { label: 'New', color: '#38bdf8' },
-  { label: 'Assigned', color: '#38bdf8' },
-  { label: 'Accepted', color: '#10b981' },
-  { label: 'In Progress', color: '#f59e0b' },
-  { label: 'Escalated', color: '#ef4444' },
-  { label: 'Resolved', color: '#10b981' },
-  { label: 'Closed', color: '#8b92a5' },
+  { label: 'New', color: 'var(--blue)' },
+  { label: 'Assigned', color: 'var(--blue)' },
+  { label: 'Accepted', color: 'var(--green)' },
+  { label: 'In Progress', color: 'var(--yellow)' },
+  { label: 'Escalated', color: 'var(--red)' },
+  { label: 'Resolved', color: 'var(--green)' },
+  { label: 'Closed', color: 'var(--text-3)' },
 ];
 
 export default function SOPManagement() {
@@ -35,153 +28,196 @@ export default function SOPManagement() {
   });
 
   return (
-    <div className="animate-fadeIn" style={{ padding: 'var(--space-5)' }}>
-
+    <div className="page animate-fadeIn">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 'var(--space-4)', flexWrap: 'wrap', gap: 12 }}>
+      <div className="page-header">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <div style={{ width: 4, height: 28, background: 'linear-gradient(180deg, #a78bfa, #38bdf8)', borderRadius: 2 }} />
-            <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>SOP & Emergency Incident Workflows</h1>
-          </div>
-          <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: 0, paddingLeft: 14 }}>
-            Standard Operating Procedures · LTIA FRS & DMKU Smart City CIOC Workflow Standards (FRS FR-09)
+          <h1 className="page-title">SOP & Emergency Incident Workflows</h1>
+          <p className="page-subtitle">
+            Long Thanh International Airport (LTIA) • Standard Operating Procedures & Smart City CIOC Workflow Standards (FRS FR-09)
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => alert('Exporting SOP audit binder to PDF...')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', fontSize: 12, cursor: 'pointer' }}>
+        <div className="page-actions">
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => alert('Exporting SOP audit binder to PDF...')}
+          >
             <Download size={13} /> Export Binder
           </button>
-          <button onClick={() => alert('New SOP authoring (Management only)')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg, #a78bfa, #38bdf8)', border: 'none', color: 'white', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>
-            <Plus size={13} /> Author New SOP
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={() => alert('New SOP authoring dialog')}
+          >
+            <Plus size={13} /> Author SOP
           </button>
         </div>
       </div>
 
-      {/* Lifecycle Pipeline Banner */}
-      <div style={{
-        padding: '14px 20px', borderRadius: 12, marginBottom: 'var(--space-4)',
-        background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
+      {/* Workflow Pipeline Banner */}
+      <div className="card" style={{
+        padding: 'var(--s3) var(--s4)', marginBottom: 'var(--s4)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: 12
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace', marginRight: 8 }}>WORKFLOW PIPELINE:</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+            Pipeline:
+          </span>
           {PIPELINE_STEPS.map((step, idx) => (
             <React.Fragment key={step.label}>
-              <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 5, background: `${step.color}18`, color: step.color, border: `1px solid ${step.color}30`, fontWeight: 700, fontFamily: 'monospace' }}>{step.label}</span>
-              {idx < PIPELINE_STEPS.length - 1 && <ArrowRight size={10} color="rgba(255,255,255,0.2)" />}
+              <span style={{
+                fontSize: 10, padding: '2px 8px', borderRadius: 'var(--r-sm)',
+                background: 'var(--bg-app)', color: step.color, border: '1px solid var(--border)',
+                fontWeight: 600, fontFamily: 'var(--mono)'
+              }}>
+                {step.label}
+              </span>
+              {idx < PIPELINE_STEPS.length - 1 && (
+                <ArrowRight size={10} style={{ color: 'var(--text-3)' }} />
+              )}
             </React.Fragment>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 16, fontSize: 10, fontFamily: 'monospace' }}>
-          <span><strong style={{ color: '#00d4aa' }}>L1:</strong> <span style={{ color: 'rgba(255,255,255,0.45)' }}>Field Dispatcher</span></span>
-          <span><strong style={{ color: '#f59e0b' }}>L2:</strong> <span style={{ color: 'rgba(255,255,255,0.45)' }}>Shift Supervisor (&gt;30m)</span></span>
-          <span><strong style={{ color: '#ef4444' }}>L3:</strong> <span style={{ color: 'rgba(255,255,255,0.45)' }}>ACMC Commander (&gt;2h)</span></span>
+
+        <div style={{ display: 'flex', gap: 16, fontSize: 11, fontFamily: 'var(--mono)' }}>
+          <span><strong style={{ color: 'var(--accent)' }}>L1:</strong> <span style={{ color: 'var(--text-3)' }}>Dispatcher</span></span>
+          <span><strong style={{ color: 'var(--yellow)' }}>L2:</strong> <span style={{ color: 'var(--text-3)' }}>Supervisor (&gt;30m)</span></span>
+          <span><strong style={{ color: 'var(--red)' }}>L3:</strong> <span style={{ color: 'var(--text-3)' }}>ACMC (&gt;2h)</span></span>
         </div>
       </div>
 
-      {/* Controls */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 'var(--space-4)', flexWrap: 'wrap', alignItems: 'center' }}>
-        <div style={{ maxWidth: 320, display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 10, padding: '8px 14px', flex: 1 }}>
-          <Search size={14} color="rgba(255,255,255,0.3)" />
+      {/* Filter and Search Bar */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        gap: 12, marginBottom: 'var(--s4)', flexWrap: 'wrap'
+      }}>
+        <div style={{ position: 'relative', width: 280 }}>
+          <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
           <input
             placeholder="Search by SOP ID or title..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'white', fontSize: 13 }}
+            style={{ paddingLeft: 32 }}
           />
         </div>
+
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          <button onClick={() => setFilterCategory('all')} style={{ padding: '6px 12px', borderRadius: 8, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: filterCategory === 'all' ? '1px solid rgba(0,212,170,0.4)' : '1px solid rgba(255,255,255,0.08)', background: filterCategory === 'all' ? 'rgba(0,212,170,0.12)' : 'transparent', color: filterCategory === 'all' ? '#00d4aa' : 'rgba(255,255,255,0.4)' }}>All</button>
-          {categories.map(c => {
-            const cfg = CATEGORY_COLORS[c] || defaultCat;
-            return (
-              <button key={c} onClick={() => setFilterCategory(c)} style={{ padding: '6px 12px', borderRadius: 8, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: filterCategory === c ? `1px solid ${cfg.border}` : '1px solid rgba(255,255,255,0.08)', background: filterCategory === c ? cfg.bg : 'transparent', color: filterCategory === c ? cfg.color : 'rgba(255,255,255,0.4)' }}>{c}</button>
-            );
-          })}
+          <button
+            onClick={() => setFilterCategory('all')}
+            className={`btn btn-xs ${filterCategory === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ fontSize: 11 }}
+          >
+            All Categories
+          </button>
+          {categories.map(c => (
+            <button
+              key={c}
+              onClick={() => setFilterCategory(c)}
+              className={`btn btn-xs ${filterCategory === c ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ fontSize: 11 }}
+            >
+              {c}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* SOP Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: 'var(--space-4)' }}>
-        {filtered.map((sop, idx) => {
-          const catCfg = CATEGORY_COLORS[sop.category] || defaultCat;
+      {/* SOP List */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--s3)' }}>
+        {filtered.map(sop => {
           const isExpanded = expandedSop === sop.id;
           return (
             <div
               key={sop.id}
+              className="card"
               style={{
-                borderRadius: 14, overflow: 'hidden',
-                background: 'rgba(255,255,255,0.03)',
-                border: `1px solid rgba(255,255,255,0.08)`,
-                borderTop: `3px solid ${catCfg.color}`,
-                transition: 'all 0.2s',
-                animationDelay: `${idx * 40}ms`,
+                padding: 0,
+                overflow: 'hidden',
+                borderColor: isExpanded ? 'var(--border-md)' : 'var(--border)'
               }}
-              className="animate-slideInUp"
             >
-              <div style={{ padding: '16px 18px' }}>
-                {/* Card Header */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 9, background: catCfg.bg, border: `1px solid ${catCfg.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <BookOpen size={16} color={catCfg.color} />
+              {/* Header */}
+              <div
+                onClick={() => setExpandedSop(isExpanded ? null : sop.id)}
+                style={{
+                  padding: 'var(--s3) var(--s4)', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  gap: 12, background: isExpanded ? 'var(--bg-overlay)' : 'transparent'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                  <span style={{
+                    fontSize: 11, fontFamily: 'var(--mono)', fontWeight: 700, color: 'var(--accent)',
+                    background: 'var(--bg-app)', padding: '3px 8px', borderRadius: 'var(--r-sm)',
+                    border: '1px solid var(--border)'
+                  }}>
+                    {sop.id}
+                  </span>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-1)' }}>
+                      {sop.title}
                     </div>
-                    <div>
-                      <div style={{ fontFamily: 'monospace', fontSize: 12, color: catCfg.color, fontWeight: 700 }}>{sop.id}</div>
-                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>{sop.version} · {sop.category}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                      Category: {sop.category} • Target SLA: {sop.targetSLA || '15 mins'} • Escalation: {sop.escalationPath || 'Level 2'}
                     </div>
                   </div>
-                  <span style={{ fontSize: 9, padding: '3px 8px', borderRadius: 5, background: 'rgba(16,185,129,0.12)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', fontWeight: 700, fontFamily: 'monospace' }}>APPROVED</span>
                 </div>
 
-                <h3 style={{ fontSize: 13, fontWeight: 700, color: 'white', marginBottom: 10, lineHeight: 1.4 }}>{sop.title}</h3>
-
-                {/* Escalation */}
-                <div style={{ padding: '8px 12px', borderRadius: 8, background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 12 }}>
-                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.06em', marginBottom: 3, fontFamily: 'monospace' }}>ESCALATION PATH</div>
-                  <div style={{ fontSize: 11, color: catCfg.color, fontFamily: 'monospace' }}>{sop.escalation || 'L1 → L2 (>30m) → L3 ACMC (>2h SLA)'}</div>
-                </div>
-
-                {/* Steps Accordion */}
-                <button
-                  onClick={() => setExpandedSop(isExpanded ? null : sop.id)}
-                  style={{
-                    width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    padding: '8px 10px', borderRadius: 8, cursor: 'pointer',
-                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)',
-                    color: 'rgba(255,255,255,0.6)', fontSize: 11, fontFamily: 'monospace',
-                    marginBottom: isExpanded ? 8 : 0,
-                  }}
-                >
-                  <span>PROCEDURE STEPS ({sop.steps?.length || 4})</span>
-                  {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                </button>
-
-                {isExpanded && sop.steps && (
-                  <div style={{ borderLeft: `2px solid ${catCfg.color}`, paddingLeft: 12, display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
-                    {sop.steps.map((step, sIdx) => (
-                      <div key={sIdx} style={{ display: 'flex', gap: 8, fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>
-                        <span style={{ fontFamily: 'monospace', color: catCfg.color, fontWeight: 700, flexShrink: 0 }}>{sIdx + 1}.</span>
-                        <span>{step}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Footer */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>MTTR: ≤ 30 min</span>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <button onClick={() => alert(`Test-running ${sop.id}...`)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, background: catCfg.bg, border: `1px solid ${catCfg.border}`, color: catCfg.color, cursor: 'pointer' }}>
-                      <CheckCircle2 size={10} /> Test Run
-                    </button>
-                    <button onClick={() => alert(`Exporting ${sop.id}...`)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
-                      <Download size={10} /> PDF
-                    </button>
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className="badge badge-operational">ACTIVE</span>
+                  {isExpanded ? <ChevronUp size={16} color="var(--text-3)" /> : <ChevronDown size={16} color="var(--text-3)" />}
                 </div>
               </div>
+
+              {/* Expanded Body */}
+              {isExpanded && (
+                <div style={{ padding: 'var(--s4)', borderTop: '1px solid var(--border)', background: 'var(--bg-app)' }}>
+                  <div style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 'var(--s3)', lineHeight: 1.5 }}>
+                    {sop.summary || 'Standard operating procedure detailing step-by-step incident response, telemetry threshold validation, and personnel notification paths.'}
+                  </div>
+
+                  {sop.steps && sop.steps.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>
+                        Action Checklist & Operational Steps:
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {sop.steps.map((step, idx) => (
+                          <div key={idx} style={{
+                            display: 'flex', alignItems: 'flex-start', gap: 8,
+                            padding: '6px 10px', background: 'var(--bg-surface)',
+                            border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', fontSize: 12
+                          }}>
+                            <span style={{
+                              width: 18, height: 18, borderRadius: '50%', background: 'var(--blue-bg)',
+                              color: 'var(--accent)', display: 'flex', alignItems: 'center',
+                              justifyContent: 'center', fontSize: 10, fontWeight: 700, flexShrink: 0
+                            }}>
+                              {idx + 1}
+                            </span>
+                            <span style={{ color: 'var(--text-1)' }}>{step}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 'var(--s3)', paddingTop: 'var(--s3)', borderTop: '1px solid var(--border)' }}>
+                    <button
+                      className="btn btn-secondary btn-xs"
+                      onClick={() => alert(`Printing checklist for ${sop.id}...`)}
+                    >
+                      Print Checklist
+                    </button>
+                    <button
+                      className="btn btn-primary btn-xs"
+                      onClick={() => alert(`SOP ${sop.id} executed for current incident`)}
+                    >
+                      Execute Workflow
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}

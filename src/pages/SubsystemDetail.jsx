@@ -1,9 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  Search, ArrowLeft, Filter, AlertTriangle, CheckCircle2, 
-  RotateCcw, Sliders, Power, Layers, Thermometer, Wind, Gauge,
-  Clock, ShieldCheck, Zap
+import {
+  Search, ArrowLeft, Power, Sliders, Shield, Cpu, Activity,
+  ChevronRight, CheckCircle2, AlertTriangle, RefreshCw
 } from 'lucide-react';
 import { useLiveData } from '../context/LiveDataContext';
 import SCADASchematic from '../components/SCADASchematic';
@@ -11,7 +10,7 @@ import SCADASchematic from '../components/SCADASchematic';
 export default function SubsystemDetail({ onSelectEquipment }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { subsystems, equipmentList, alerts, toggleEquipmentPower, setEquipmentMode, adjustSetpoint } = useLiveData();
+  const { subsystems, equipmentList, toggleEquipmentPower, setEquipmentMode, adjustSetpoint } = useLiveData();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [floorFilter, setFloorFilter] = useState('ALL');
@@ -23,7 +22,6 @@ export default function SubsystemDetail({ onSelectEquipment }) {
     id: sysCode,
     name: 'Building Subsystem',
     protocol: 'OPC UA',
-    integrationType: 'Industrial Telemetry',
     total: 100,
     operational: 98,
     health: 98,
@@ -31,7 +29,6 @@ export default function SubsystemDetail({ onSelectEquipment }) {
     desc: 'Real-time SCADA subsystem telemetry and node controls',
   };
 
-  // Filter equipment for this subsystem
   const subsystemEquipment = useMemo(() => {
     return equipmentList.filter(e => {
       if (e.system !== sysCode && sysCode !== 'ALL') return false;
@@ -45,50 +42,53 @@ export default function SubsystemDetail({ onSelectEquipment }) {
   const selectedDevice = equipmentList.find(e => e.id === selectedEqId) || subsystemEquipment[0];
 
   return (
-    <div className="subsystem-detail animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-      {/* 1. Header & Quick Navigation */}
-      <div className="flex justify-between items-center flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <button 
+    <div className="page animate-fadeIn">
+      {/* Top Header & Back Navigation */}
+      <div className="page-header" style={{ marginBottom: 'var(--s4)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
             className="btn btn-secondary btn-sm"
             onClick={() => navigate('/subsystems')}
           >
-            <ArrowLeft size={14} /> Back to Subsystems
+            <ArrowLeft size={14} /> Back
           </button>
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold font-mono text-primary m-0">{currentSubsystem.id} — {currentSubsystem.name}</h2>
-              <span className={`status-badge ${currentSubsystem.health >= 90 ? 'operational' : 'warning'}`}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h1 className="page-title" style={{ fontFamily: 'var(--mono)' }}>
+                {currentSubsystem.id} — {currentSubsystem.name}
+              </h1>
+              <span className={`badge ${currentSubsystem.status === 'operational' ? 'badge-operational' : 'badge-warning'}`}>
                 {currentSubsystem.health}% SLA
               </span>
-              <span className="text-3xs font-mono text-teal bg-elevated px-2 py-0.5 rounded border border-subtle">
+              <span style={{
+                fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--text-3)',
+                background: 'var(--bg-overlay)', padding: '2px 6px', borderRadius: 'var(--r-sm)'
+              }}>
                 {currentSubsystem.protocol}
               </span>
             </div>
-            <span className="text-2xs text-secondary">
-              {currentSubsystem.total.toLocaleString()} Total System Assets ({subsystemEquipment.length} Sample Telemetry Nodes Filtered) • Mode: Read-Only Supervisory
-            </span>
+            <p className="page-subtitle">
+              {currentSubsystem.total} Total System Assets • {subsystemEquipment.length} Filtered Nodes
+            </p>
           </div>
         </div>
 
-        {/* Search and Filters */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="search-input-wrapper" style={{ width: 180 }}>
-            <Search size={13} />
-            <input 
-              className="search-input"
-              placeholder="Search ID or Zone..."
+        {/* Filter controls */}
+        <div className="page-actions" style={{ gap: 8 }}>
+          <div style={{ position: 'relative', width: 180 }}>
+            <Search size={13} style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
+            <input
+              placeholder="Search ID/Zone..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              style={{ height: 30, fontSize: '11px' }}
+              style={{ paddingLeft: 28, height: 32, fontSize: 12 }}
             />
           </div>
 
-          <select 
-            className="search-input"
-            style={{ height: 30, fontSize: '11px', padding: '2px 8px' }}
+          <select
             value={floorFilter}
             onChange={e => setFloorFilter(e.target.value)}
+            style={{ width: 110, height: 32, fontSize: 12 }}
           >
             <option value="ALL">All Floors</option>
             <option value="GF">Ground Floor</option>
@@ -99,131 +99,129 @@ export default function SubsystemDetail({ onSelectEquipment }) {
             <option value="PIT">PIT Level</option>
           </select>
 
-          <select 
-            className="search-input"
-            style={{ height: 30, fontSize: '11px', padding: '2px 8px' }}
+          <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
+            style={{ width: 120, height: 32, fontSize: 12 }}
           >
             <option value="ALL">All Statuses</option>
             <option value="operational">Operational</option>
             <option value="warning">Warning</option>
-            <option value="critical">Critical</option>
-            <option value="offline">Offline</option>
+            <option value="critical">Fault</option>
           </select>
         </div>
       </div>
 
-      {/* 2. Main 2-Column Layout: Equipment Cards Grid + Detailed Inspector */}
-      <div className="scada-split-2-1">
-        {/* Equipment Cards (2 Columns Wide) */}
-        <div className="card p-3">
-          <div className="card-header py-1 px-2 mb-2 flex justify-between items-center">
-            <span className="card-title text-xs font-mono font-bold uppercase">Subsystem Equipment Fleet</span>
-            <span className="text-2xs text-tertiary font-mono">{subsystemEquipment.length} active nodes</span>
+      {/* Main 2-Column View: Equipment List + Device Inspector */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 380px',
+        gap: 'var(--s4)',
+        alignItems: 'start'
+      }}>
+        {/* Left Column: Equipment Cards */}
+        <div className="card" style={{ padding: 'var(--s4)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--s3)' }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Subsystem Equipment Nodes ({subsystemEquipment.length})
+            </span>
+            <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
+              Click device to inspect telemetry & controls
+            </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '10px', maxHeight: 'clamp(420px, 62vh, 700px)', overflowY: 'auto', padding: '2px' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+            gap: 'var(--s3)',
+            maxHeight: 'calc(100vh - 240px)',
+            overflowY: 'auto',
+            paddingRight: 4
+          }}>
             {subsystemEquipment.map(eq => {
               const isSelected = selectedDevice?.id === eq.id;
               const isRunning = eq.mode !== 'Stop' && eq.status !== 'offline';
+              const statusClass =
+                eq.status === 'operational' ? 'badge-operational' :
+                eq.status === 'warning' ? 'badge-warning' :
+                eq.status === 'critical' ? 'badge-critical' : 'badge-offline';
+
               return (
-                <div 
+                <div
                   key={eq.id}
-                  className="card p-3"
                   onClick={() => {
                     setSelectedEqId(eq.id);
                     onSelectEquipment?.(eq);
                   }}
-                  style={{ 
+                  style={{
+                    background: isSelected ? 'var(--bg-overlay)' : 'var(--bg-app)',
+                    border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
+                    borderRadius: 'var(--r-md)',
+                    padding: 'var(--s3)',
                     cursor: 'pointer',
-                    background: isSelected ? 'var(--bg-elevated)' : 'var(--bg-surface)',
-                    border: isSelected ? '1px solid var(--accent-teal)' : '1px solid var(--border-subtle)',
-                    borderLeft: eq.status === 'critical' ? '4px solid var(--status-critical)' : eq.status === 'warning' ? '4px solid var(--status-warning)' : '4px solid var(--status-operational)',
-                    transition: 'all 0.15s',
-                    borderRadius: '8px'
+                    transition: 'all 0.15s ease',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8
                   }}
                 >
-                  {/* Equipment Header */}
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex flex-col">
-                      <span className="font-mono text-xs font-bold text-primary">{eq.id}</span>
-                      <span className="text-3xs text-secondary mt-0.5">{eq.type} • {eq.floor} • {eq.zone}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-1)', fontFamily: 'var(--mono)' }}>
+                        {eq.id}
+                      </div>
+                      <div style={{ fontSize: 10, color: 'var(--text-3)' }}>
+                        {eq.type} • {eq.floor} • {eq.zone}
+                      </div>
                     </div>
-                    <span className={`status-badge ${eq.status}`} style={{ fontSize: '8px', padding: '1px 5px' }}>
+                    <span className={`badge ${statusClass}`} style={{ fontSize: 9 }}>
                       {eq.status.toUpperCase()}
                     </span>
                   </div>
 
-                  {/* Telemetry Metrics Grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px', marginBottom: '8px' }}>
-                    {eq.temp !== null && eq.temp !== undefined && (
-                      <div className="param-box">
-                        <span className="param-label">Temp</span>
-                        <span className="param-val font-mono text-teal">{eq.temp}°C</span>
+                  {/* Parameter chips */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
+                    {eq.temp !== undefined && eq.temp !== null && (
+                      <div style={{ background: 'var(--bg-surface)', padding: '3px 6px', borderRadius: 'var(--r-sm)', fontSize: 10 }}>
+                        <span style={{ color: 'var(--text-3)' }}>Temp: </span>
+                        <span style={{ color: 'var(--text-1)', fontWeight: 600, fontFamily: 'var(--mono)' }}>{eq.temp}°C</span>
                       </div>
                     )}
-                    {eq.fanRPM !== null && eq.fanRPM !== undefined && (
-                      <div className="param-box">
-                        <span className="param-label">Fan Speed</span>
-                        <span className="param-val font-mono">{eq.fanRPM} RPM</span>
+                    {eq.fanRPM !== undefined && eq.fanRPM !== null && (
+                      <div style={{ background: 'var(--bg-surface)', padding: '3px 6px', borderRadius: 'var(--r-sm)', fontSize: 10 }}>
+                        <span style={{ color: 'var(--text-3)' }}>Fan: </span>
+                        <span style={{ color: 'var(--text-1)', fontWeight: 600, fontFamily: 'var(--mono)' }}>{eq.fanRPM} RPM</span>
                       </div>
                     )}
-                    {eq.coolingValve !== null && eq.coolingValve !== undefined && (
-                      <div className="param-box">
-                        <span className="param-label">Cooling Valve</span>
-                        <span className="param-val font-mono text-amber">{eq.coolingValve}%</span>
+                    {eq.voltage !== undefined && eq.voltage !== null && (
+                      <div style={{ background: 'var(--bg-surface)', padding: '3px 6px', borderRadius: 'var(--r-sm)', fontSize: 10 }}>
+                        <span style={{ color: 'var(--text-3)' }}>Volt: </span>
+                        <span style={{ color: 'var(--text-1)', fontWeight: 600, fontFamily: 'var(--mono)' }}>{eq.voltage}V</span>
                       </div>
                     )}
-                    {eq.voltage !== null && eq.voltage !== undefined && (
-                      <div className="param-box">
-                        <span className="param-label">Voltage</span>
-                        <span className="param-val font-mono text-cyan">{eq.voltage} V</span>
-                      </div>
-                    )}
-                    {eq.powerFactor !== null && eq.powerFactor !== undefined && (
-                      <div className="param-box">
-                        <span className="param-label">cos φ</span>
-                        <span className="param-val font-mono text-teal">{eq.powerFactor}</span>
-                      </div>
-                    )}
-                    {eq.shutterState && (
-                      <div className="param-box">
-                        <span className="param-label">Shutter</span>
-                        <span className={`param-val font-mono ${eq.shutterState === 'Closed' ? 'text-red' : 'text-teal'}`}>{eq.shutterState}</span>
-                      </div>
-                    )}
-                    {eq.power !== null && eq.power !== undefined && (
-                      <div className="param-box">
-                        <span className="param-label">Power</span>
-                        <span className="param-val font-mono">{eq.power} kW</span>
+                    {eq.power !== undefined && eq.power !== null && (
+                      <div style={{ background: 'var(--bg-surface)', padding: '3px 6px', borderRadius: 'var(--r-sm)', fontSize: 10 }}>
+                        <span style={{ color: 'var(--text-3)' }}>Pwr: </span>
+                        <span style={{ color: 'var(--text-1)', fontWeight: 600, fontFamily: 'var(--mono)' }}>{eq.power} kW</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Quick Control Footer */}
-                  <div className="pt-2 border-t border-subtle flex justify-between items-center">
-                    <span className="text-3xs font-mono text-tertiary">Mode: <strong className="text-secondary">{eq.mode}</strong></span>
-                    <div className="flex gap-1.5">
-                      <button 
-                        className={`btn btn-sm ${isRunning ? 'btn-danger' : 'btn-primary'}`}
-                        style={{ padding: '2px 8px', fontSize: '10px' }}
+                  {/* Actions */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: 6 }}>
+                    <span style={{ fontSize: 10, color: 'var(--text-3)', fontFamily: 'var(--mono)' }}>
+                      Mode: <span style={{ color: 'var(--text-2)' }}>{eq.mode}</span>
+                    </span>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <button
+                        className={`btn btn-xs ${isRunning ? 'btn-danger' : 'btn-primary'}`}
+                        style={{ padding: '2px 6px', fontSize: 10 }}
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleEquipmentPower(eq.id);
                         }}
                       >
-                        <Power size={10} /> {isRunning ? 'Stop' : 'Run'}
-                      </button>
-                      <button 
-                        className="btn btn-secondary btn-sm"
-                        style={{ padding: '2px 8px', fontSize: '10px' }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSelectEquipment?.(eq);
-                        }}
-                      >
-                        Inspect
+                        <Power size={9} style={{ marginRight: 2 }} /> {isRunning ? 'Stop' : 'Run'}
                       </button>
                     </div>
                   </div>
@@ -233,84 +231,99 @@ export default function SubsystemDetail({ onSelectEquipment }) {
           </div>
         </div>
 
-        {/* Device Live Inspector (1 Column Wide) */}
+        {/* Right Column: Device Inspector */}
         {selectedDevice && (
-          <div className="card p-3 flex flex-col gap-3">
-            <div className="card-header py-1 px-2 mb-1 flex justify-between items-center">
-              <span className="card-title text-xs font-mono font-bold uppercase">Device Inspector & Schematic</span>
-              <span className={`status-badge ${selectedDevice.status}`}>
+          <div className="card" style={{ padding: 'var(--s4)', display: 'flex', flexDirection: 'column', gap: 'var(--s4)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)', fontFamily: 'var(--mono)' }}>
+                  {selectedDevice.id}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                  {selectedDevice.type} • {selectedDevice.floor} • {selectedDevice.zone}
+                </div>
+              </div>
+              <span className={`badge ${selectedDevice.status === 'operational' ? 'badge-operational' : 'badge-warning'}`}>
                 {selectedDevice.status.toUpperCase()}
               </span>
             </div>
 
-            {/* Industrial SCADA Schematic Diagram */}
-            <SCADASchematic equipment={selectedDevice} />
+            {/* Schematic */}
+            <div style={{
+              background: 'var(--bg-app)', border: '1px solid var(--border)',
+              borderRadius: 'var(--r-md)', padding: 'var(--s3)', overflow: 'hidden'
+            }}>
+              <SCADASchematic equipment={selectedDevice} />
+            </div>
 
-            <div className="flex flex-col gap-3">
-              <div className="p-2.5 bg-elevated rounded border border-subtle">
-                <div className="font-mono text-sm font-bold text-primary">{selectedDevice.id}</div>
-                <div className="text-2xs text-secondary">{selectedDevice.type} • {selectedDevice.system} Subsystem ({currentSubsystem.protocol})</div>
-                <div className="text-3xs text-tertiary mt-1">Location: {selectedDevice.floor} — {selectedDevice.zone}</div>
+            {/* Setpoint Slider if applicable */}
+            {selectedDevice.setpoint !== undefined && selectedDevice.setpoint !== null && (
+              <div style={{
+                background: 'var(--bg-app)', border: '1px solid var(--border)',
+                borderRadius: 'var(--r-md)', padding: 'var(--s3)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 6 }}>
+                  <span style={{ color: 'var(--text-2)' }}>Temperature Setpoint</span>
+                  <span style={{ color: 'var(--accent)', fontWeight: 700, fontFamily: 'var(--mono)' }}>
+                    {selectedDevice.setpoint}°C
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="18"
+                  max="28"
+                  step="0.5"
+                  value={selectedDevice.setpoint}
+                  onChange={(e) => adjustSetpoint(selectedDevice.id, parseFloat(e.target.value))}
+                  style={{ width: '100%', cursor: 'pointer' }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-3)', marginTop: 4 }}>
+                  <span>18°C</span>
+                  <span>24°C (Target)</span>
+                  <span>28°C</span>
+                </div>
               </div>
+            )}
 
-              {/* Setpoint Slider if applicable */}
-              {selectedDevice.setpoint !== undefined && selectedDevice.setpoint !== null && (
-                <div className="p-2.5 bg-elevated rounded border border-subtle">
-                  <div className="flex justify-between text-xs font-mono mb-1">
-                    <span className="text-tertiary">Temperature Setpoint</span>
-                    <span className="text-teal font-bold">{selectedDevice.setpoint}°C</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="18" 
-                    max="28" 
-                    step="0.5"
-                    value={selectedDevice.setpoint}
-                    onChange={(e) => adjustSetpoint(selectedDevice.id, parseFloat(e.target.value))}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-3xs text-tertiary font-mono mt-1">
-                    <span>18°C</span>
-                    <span>24°C (Nominal)</span>
-                    <span>28°C</span>
-                  </div>
-                </div>
-              )}
+            {/* Control Modes */}
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button
+                className={`btn btn-sm ${selectedDevice.mode === 'Auto' ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ flex: 1 }}
+                onClick={() => setEquipmentMode(selectedDevice.id, 'Auto')}
+              >
+                AUTO
+              </button>
+              <button
+                className={`btn btn-sm ${selectedDevice.mode === 'Manual' ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ flex: 1 }}
+                onClick={() => setEquipmentMode(selectedDevice.id, 'Manual')}
+              >
+                MANUAL
+              </button>
+            </div>
 
-              {/* Mode Switcher */}
-              <div className="flex gap-2">
-                <button 
-                  className={`btn btn-sm flex-1 ${selectedDevice.mode === 'Auto' || selectedDevice.mode === 'Closed' ? 'btn-primary' : 'btn-secondary'}`}
-                  onClick={() => setEquipmentMode(selectedDevice.id, 'Auto')}
-                >
-                  AUTO
-                </button>
-                <button 
-                  className={`btn btn-sm flex-1 ${selectedDevice.mode === 'Manual' || selectedDevice.mode === 'Open' ? 'btn-primary' : 'btn-secondary'}`}
-                  onClick={() => setEquipmentMode(selectedDevice.id, 'Manual')}
-                >
-                  MANUAL
-                </button>
+            {/* Telemetry Points */}
+            <div style={{
+              background: 'var(--bg-app)', border: '1px solid var(--border)',
+              borderRadius: 'var(--r-md)', padding: 'var(--s3)',
+              display: 'flex', flexDirection: 'column', gap: 6, fontSize: 11
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-3)' }}>Health Score</span>
+                <span style={{ color: 'var(--green)', fontWeight: 600, fontFamily: 'var(--mono)' }}>{selectedDevice.health}%</span>
               </div>
-
-              {/* Live Telemetry Table */}
-              <div className="flex flex-col gap-1.5 text-2xs font-mono">
-                <div className="flex justify-between py-1 border-b border-subtle">
-                  <span className="text-tertiary">Health Score</span>
-                  <span className="text-teal font-bold">{selectedDevice.health}%</span>
-                </div>
-                <div className="flex justify-between py-1 border-b border-subtle">
-                  <span className="text-tertiary">Communication</span>
-                  <span className="text-teal">{selectedDevice.comm || currentSubsystem.protocol}</span>
-                </div>
-                <div className="flex justify-between py-1 border-b border-subtle">
-                  <span className="text-tertiary">Supervisory Mode</span>
-                  <span className="text-secondary">Read-Only (AVEVA UOC)</span>
-                </div>
-                <div className="flex justify-between py-1 border-b border-subtle">
-                  <span className="text-tertiary">Last Update</span>
-                  <span className="text-secondary">{selectedDevice.lastUpdate}</span>
-                </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-3)' }}>Protocol</span>
+                <span style={{ color: 'var(--text-1)', fontFamily: 'var(--mono)' }}>{currentSubsystem.protocol}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-3)' }}>Control Loop</span>
+                <span style={{ color: 'var(--accent)' }}>Supervisory (AVEVA UOC)</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-3)' }}>Last Ping</span>
+                <span style={{ color: 'var(--text-2)', fontFamily: 'var(--mono)' }}>{selectedDevice.lastUpdate || 'Just now'}</span>
               </div>
             </div>
           </div>

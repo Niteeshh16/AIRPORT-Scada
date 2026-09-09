@@ -17,38 +17,37 @@ export default function ModeSwitcherBar({ activeMode }) {
       <button
         className={`mode-btn ${currentMode === 'cmd' ? 'active' : ''}`}
         onClick={() => navigate('/')}
-        title="Main Command Center with All-Floor Building Overview"
+        title="Command Center Dashboard"
       >
         <LayoutDashboard size={13} />
-        <span>COMMAND CENTER</span>
+        <span>Command Center</span>
       </button>
 
       <button
         className={`mode-btn ${currentMode === 'twin' ? 'active' : ''}`}
         onClick={() => navigate('/digital-twin')}
-        title="Interactive 3D Airport Digital Twin"
-        style={currentMode === 'twin' ? { borderBottom: '2px solid #38bdf8', color: '#38bdf8' } : {}}
+        title="3D Airport Digital Twin"
       >
         <Globe size={13} />
-        <span>3D TWIN</span>
+        <span>3D Digital Twin</span>
       </button>
 
       <button
         className={`mode-btn ${currentMode === 'supervisor' ? 'active' : ''}`}
         onClick={() => navigate('/supervisor-mode')}
-        title="Supervisor Observability Mode"
+        title="Supervisor Observability"
       >
         <User size={13} />
-        <span>SUPERVISOR</span>
+        <span>Supervisor View</span>
       </button>
 
       <button
         className={`mode-btn ${currentMode === 'operator' ? 'active' : ''}`}
         onClick={() => navigate('/operator-mode')}
-        title="Operator Cockpit Mode"
+        title="Operator Cockpit"
       >
         <Sliders size={13} />
-        <span>OPERATOR</span>
+        <span>Operator Cockpit</span>
       </button>
     </div>
   );

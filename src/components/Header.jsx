@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Bell, Menu, Terminal, Sun, Moon, Shield, Wifi,
-  Layers, Clock, RefreshCw, AlertTriangle, AlertOctagon, Check, ArrowRight, X
+  Bell, Menu, Check, ArrowRight, ShieldCheck, Activity
 } from 'lucide-react';
 import { useLiveData } from '../context/LiveDataContext';
 import { useNavigate } from 'react-router-dom';
 
-export default function Header({ currentTime, moduleName, onToggleSidebar }) {
+export default function Header({ currentTime, moduleName, onToggleSidebar, currentUser }) {
   const { alerts, acknowledgeAlert } = useLiveData();
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -17,10 +16,8 @@ export default function Header({ currentTime, moduleName, onToggleSidebar }) {
   });
 
   const unacknowledgedAlerts = alerts.filter(a => !a.acknowledged);
-  const criticalCount = unacknowledgedAlerts.filter(a => a.severity === 'critical').length;
   const totalUnack = unacknowledgedAlerts.length;
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(e) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -39,115 +36,109 @@ export default function Header({ currentTime, moduleName, onToggleSidebar }) {
 
   return (
     <header className="app-header">
-      {/* Left: Hamburger + Title + Breadcrumb matching reference image */}
+      {/* Left: Menu toggle + Breadcrumb */}
       <div className="header-left">
         <button
-          className="header-hamburger"
+          className="header-menu-btn"
           onClick={onToggleSidebar}
           title="Toggle Navigation"
         >
-          <Menu size={18} />
+          <Menu size={17} />
         </button>
 
-        <span className="header-airport-name font-mono">LONG THANH AIRPORT HBMS</span>
-        <span className="text-zinc-600 mx-1.5 font-mono">/</span>
-        <span className="text-zinc-400 font-mono text-xs">{moduleName}</span>
+        <div className="header-breadcrumb">
+          <span className="header-breadcrumb-root">LTIA HBMS</span>
+          <span className="header-breadcrumb-sep">/</span>
+          <span className="header-breadcrumb-current">{moduleName}</span>
+        </div>
       </div>
 
-      {/* Right: Protocol status + Clock + Theme toggle + Notifications Bell + Profile */}
-      <div className="header-right" style={{ position: 'relative' }}>
+      {/* Right: Network status + Clock + Notifications + User */}
+      <div className="header-right">
         {/* Network & Protocol Status */}
-        <div className="header-status live">
-          <span className="status-dot" />
-          <span>BACnet/IP • OPC-UA ONLINE</span>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 6,
+          padding: '3px 9px', borderRadius: 'var(--r-md)',
+          background: 'var(--green-bg)', border: '1px solid rgba(63,185,80,0.2)',
+          fontSize: 11, fontWeight: 500, color: 'var(--green)'
+        }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%', background: 'var(--green)',
+            boxShadow: '0 0 6px var(--green)'
+          }} />
+          <span className="hidden sm:inline" style={{ letterSpacing: '0.02em' }}>ONLINE</span>
         </div>
 
         {/* Live Clock */}
-        <div className="header-clock font-mono">
-          <span>{timeStr}</span>
+        <div className="header-time">
+          {timeStr}
         </div>
 
-        {/* Theme Sun Toggle */}
-        <button className="header-icon-btn" title="Toggle Theme (Dark Industrial SCADA)">
-          <Sun size={16} className="text-zinc-400 hover:text-white transition-colors" />
-        </button>
+        <div className="header-divider" />
 
-        {/* Top Notifications Bell Button & Dropdown Anchor */}
+        {/* Notification Bell & Dropdown */}
         <div ref={dropdownRef} style={{ position: 'relative' }}>
           <button
             className={`header-icon-btn ${notifDropdownOpen ? 'active' : ''}`}
             onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
             title="System Alarms & Notifications"
-            style={{
-              position: 'relative',
-              background: notifDropdownOpen ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
-              color: notifDropdownOpen ? '#38bdf8' : totalUnack > 0 ? '#f87171' : 'inherit'
-            }}
           >
-            <Bell size={17} className={criticalCount > 0 ? 'pulse-fast' : ''} />
+            <Bell size={16} />
             {totalUnack > 0 && (
-              <span className={`notification-badge ${criticalCount > 0 ? 'critical' : ''}`}>
-                {totalUnack}
+              <span className="header-notif-badge">
+                {totalUnack > 9 ? '9+' : totalUnack}
               </span>
             )}
           </button>
 
-          {/* Top Notifications Dropdown Panel */}
+          {/* Notifications Dropdown */}
           {notifDropdownOpen && (
-            <div className="top-notif-dropdown animate-fadeIn">
-              <div className="top-notif-dropdown-header">
-                <div className="flex items-center gap-2">
-                  <Bell size={14} className="text-teal" />
-                  <span className="font-mono text-xs font-bold uppercase tracking-wider text-primary">
-                    ACTIVE ALARMS ({totalUnack})
-                  </span>
+            <div className="notif-dropdown">
+              <div className="notif-dropdown-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Bell size={14} style={{ color: 'var(--red)' }} />
+                  <span>Active Alarms ({totalUnack})</span>
                 </div>
                 {totalUnack > 0 && (
                   <button
                     onClick={handleAckAll}
-                    className="text-3xs font-mono text-teal hover:underline flex items-center gap-1"
+                    style={{
+                      background: 'none', border: 'none', color: 'var(--accent)',
+                      fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 3
+                    }}
                   >
-                    <Check size={11} />
-                    <span>Ack All</span>
+                    <Check size={11} /> Ack All
                   </button>
                 )}
               </div>
 
-              <div className="top-notif-dropdown-body">
+              <div className="notif-dropdown-body">
                 {unacknowledgedAlerts.length === 0 ? (
-                  <div className="p-4 text-center text-tertiary text-xs">
+                  <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--text-3)', fontSize: 13 }}>
                     All alarms cleared and acknowledged.
                   </div>
                 ) : (
-                  unacknowledgedAlerts.slice(0, 6).map(alert => (
-                    <div
-                      key={alert.id}
-                      className={`top-notif-dropdown-item ${alert.severity}`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <span className={`status-badge ${alert.severity}`} style={{ fontSize: '8px', padding: '1px 5px' }}>
-                            {alert.severity.toUpperCase()}
-                          </span>
-                          <span className="font-mono text-xs font-bold text-teal truncate">
-                            {alert.equipment}
-                          </span>
-                        </div>
-                        <span className="text-3xs font-mono text-tertiary shrink-0">{alert.time}</span>
+                  unacknowledgedAlerts.slice(0, 5).map(alert => (
+                    <div key={alert.id} className="notif-item">
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                        <span className={`badge ${alert.severity === 'critical' ? 'badge-critical' : 'badge-warning'}`} style={{ fontSize: 10 }}>
+                          {alert.severity.toUpperCase()}
+                        </span>
+                        <span style={{ fontSize: 11, color: 'var(--text-3)', fontFamily: 'var(--mono)' }}>{alert.time}</span>
                       </div>
-
-                      <div className="text-2xs text-secondary mt-1 line-clamp-2">
+                      <div style={{ fontSize: 12, color: 'var(--text-1)', fontWeight: 500, marginBottom: 2 }}>
+                        {alert.equipment}
+                      </div>
+                      <div style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.4 }}>
                         {alert.message}
                       </div>
-
-                      <div className="flex justify-end gap-2 mt-2">
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
                         <button
                           onClick={() => acknowledgeAlert(alert.id)}
-                          className="btn btn-secondary btn-xs"
-                          style={{ fontSize: '10px', padding: '2px 8px', height: 22 }}
+                          className="btn btn-secondary btn-sm"
+                          style={{ padding: '2px 8px', fontSize: 11 }}
                         >
-                          <Check size={11} />
-                          <span>Acknowledge</span>
+                          <Check size={11} style={{ marginRight: 3 }} /> Acknowledge
                         </button>
                       </div>
                     </div>
@@ -155,30 +146,32 @@ export default function Header({ currentTime, moduleName, onToggleSidebar }) {
                 )}
               </div>
 
-              <div className="top-notif-dropdown-footer">
+              <div className="notif-dropdown-footer">
                 <button
                   onClick={() => {
                     setNotifDropdownOpen(false);
                     navigate('/alerts');
                   }}
-                  className="w-full text-center text-xs font-mono text-teal hover:underline flex items-center justify-center gap-1.5 py-1"
+                  style={{
+                    background: 'none', border: 'none', color: 'var(--accent)',
+                    fontSize: 12, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4
+                  }}
                 >
-                  <span>Open Alarm Management Center</span>
-                  <ArrowRight size={12} />
+                  View All Alarms <ArrowRight size={12} />
                 </button>
               </div>
             </div>
           )}
         </div>
 
-        {/* Profile User Avatar */}
-        <div className="header-user">
+        {/* User Pill */}
+        <div className="header-user" onClick={() => navigate('/users')} title="Account Profile">
           <div className="header-avatar">
-            A
+            {currentUser?.avatar || currentUser?.name?.charAt(0) || 'U'}
           </div>
-          <div className="header-user-info">
-            <span className="header-user-name">Arjun S.</span>
-            <span className="header-user-role">Super Admin</span>
+          <div className="header-user-info hidden md:block">
+            <div className="header-user-name">{currentUser?.name || 'Operator'}</div>
+            <div className="header-user-role">{currentUser?.role || 'SOC'}</div>
           </div>
         </div>
       </div>

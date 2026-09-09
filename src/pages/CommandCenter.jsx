@@ -3,7 +3,8 @@ import {
   Package, Activity, Zap, Server, ShieldCheck, Volume2,
   Flame, Clock, Wind, PlaneLanding, ScanLine, DoorOpen,
   AlertTriangle, CheckCircle2, ChevronRight, ArrowRight,
-  RefreshCw, Radio, Layers, Maximize2, X, Check, Eye
+  RefreshCw, Radio, Layers, Maximize2, X, Check, Eye,
+  Cpu, Wrench, Shield
 } from 'lucide-react';
 import MultiFloorMapGrid, { FloorSchematic } from '../components/MultiFloorMapGrid';
 import { useNavigate } from 'react-router-dom';
@@ -284,6 +285,45 @@ export default function CommandCenter({ onSelectEquipment }) {
   return (
     <div className="command-center-root">
       
+      {/* Top Level Operational KPI Cards */}
+      <div className="stat-grid stat-grid-4">
+        <div className="stat-card" onClick={() => navigate('/equipment')} style={{ cursor: 'pointer' }} title="View All Assets">
+          <div className="stat-icon blue"><Cpu size={18} /></div>
+          <div className="stat-content">
+            <div className="stat-value">2,684</div>
+            <div className="stat-label">Total Monitored Assets</div>
+            <div className="stat-note">12 Subsystems Connected</div>
+          </div>
+        </div>
+
+        <div className="stat-card" onClick={() => navigate('/alerts')} style={{ cursor: 'pointer' }} title="View Active Alarms">
+          <div className="stat-icon red"><AlertTriangle size={18} /></div>
+          <div className="stat-content">
+            <div className="stat-value">14</div>
+            <div className="stat-label">Active System Alarms</div>
+            <div className="stat-note">2 Critical • 5 High</div>
+          </div>
+        </div>
+
+        <div className="stat-card" onClick={() => navigate('/work-orders')} style={{ cursor: 'pointer' }} title="View Work Orders">
+          <div className="stat-icon yellow"><Wrench size={18} /></div>
+          <div className="stat-content">
+            <div className="stat-value">7</div>
+            <div className="stat-label">Open Work Orders</div>
+            <div className="stat-note">3 In Progress • 4 Dispatched</div>
+          </div>
+        </div>
+
+        <div className="stat-card" onClick={() => navigate('/subsystems')} style={{ cursor: 'pointer' }} title="View Subsystems Directory">
+          <div className="stat-icon green"><Activity size={18} /></div>
+          <div className="stat-content">
+            <div className="stat-value">97.4%</div>
+            <div className="stat-label">Overall Fleet Availability</div>
+            <div className="stat-note">Dual Redundant BACnet/OPC-UA</div>
+          </div>
+        </div>
+      </div>
+
       {/* 2-Column Responsive SCADA Layout matching user reference image */}
       <div className="command-center-workspace">
         

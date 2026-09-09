@@ -1,13 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Database, BarChart3, Layers, Filter, Cpu, Activity } from 'lucide-react';
+import { Search, Database, Cpu, Activity, Shield, AlertTriangle, ChevronRight } from 'lucide-react';
 import { useLiveData } from '../context/LiveDataContext';
-
-const STATUS_CFG = {
-  operational: { color: '#10b981', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.3)' },
-  warning:     { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)' },
-  critical:    { color: '#ef4444', bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.3)' },
-  offline:     { color: '#8b92a5', bg: 'rgba(139,146,165,0.1)', border: 'rgba(139,146,165,0.2)' },
-};
 
 export default function AssetManagement({ onSelectEquipment }) {
   const { equipmentList, airportInfo } = useLiveData();
@@ -36,129 +29,179 @@ export default function AssetManagement({ onSelectEquipment }) {
   }, [filtered, groupBy]);
 
   const kpis = [
-    { label: 'Total Assets', value: equipmentList.length, color: '#00d4aa' },
-    { label: 'Operational', value: equipmentList.filter(e => e.status === 'operational').length, color: '#10b981' },
-    { label: 'Needs Attention', value: equipmentList.filter(e => e.status === 'warning' || e.status === 'critical').length, color: '#f59e0b' },
-    { label: 'Asset Classes', value: new Set(equipmentList.map(e => e.type)).size, color: '#38bdf8' },
+    { label: 'Total Tracked Assets', value: equipmentList.length, color: 'blue', icon: Database },
+    { label: 'Operational Nodes', value: equipmentList.filter(e => e.status === 'operational').length, color: 'green', icon: Activity },
+    { label: 'Requires Attention', value: equipmentList.filter(e => e.status === 'warning' || e.status === 'critical').length, color: 'yellow', icon: AlertTriangle },
+    { label: 'Unique Asset Classes', value: new Set(equipmentList.map(e => e.type)).size, color: 'purple', icon: Cpu },
   ];
 
   return (
-    <div className="animate-fadeIn" style={{ padding: 'var(--space-5)' }}>
-
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 'var(--space-5)', flexWrap: 'wrap', gap: 12 }}>
+    <div className="page animate-fadeIn">
+      {/* Page Header */}
+      <div className="page-header">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <div style={{ width: 4, height: 28, background: 'linear-gradient(180deg, #38bdf8, #00d4aa)', borderRadius: 2 }} />
-            <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>Asset Registry & Lifecycle</h1>
-          </div>
-          <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: 0, paddingLeft: 14 }}>
-            {airportInfo.name} · Complete building equipment inventory & real-time operational telemetry
+          <h1 className="page-title">Asset Registry & Lifecycle Management</h1>
+          <p className="page-subtitle">
+            Long Thanh International Airport (LTIA) • Complete building equipment inventory & operational telemetry
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.2)', borderRadius: 10, padding: '8px 14px' }}>
-          <Database size={14} color="#00d4aa" />
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#00d4aa', fontFamily: 'monospace' }}>{equipmentList.length} Monitored Nodes</span>
+        <div className="page-actions">
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: 'var(--bg-surface)', border: '1px solid var(--border)',
+            padding: '6px 12px', borderRadius: 'var(--r-md)', fontSize: 12, color: 'var(--accent)'
+          }}>
+            <Database size={13} />
+            <span style={{ fontFamily: 'var(--mono)', fontWeight: 700 }}>{equipmentList.length} Total Monitored Nodes</span>
+          </div>
         </div>
       </div>
 
       {/* KPI Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-3)', marginBottom: 'var(--space-5)' }}>
-        {kpis.map(({ label, value, color }) => (
-          <div key={label} style={{ padding: '20px', borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-            <div style={{ fontSize: 28, fontWeight: 800, color, fontFamily: 'monospace', lineHeight: 1 }}>{value}</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
-          </div>
-        ))}
+      <div className="stat-grid stat-grid-4" style={{ marginBottom: 'var(--s5)' }}>
+        {kpis.map((kpi, idx) => {
+          const Icon = kpi.icon;
+          return (
+            <div key={idx} className="stat-card">
+              <div className={`stat-icon ${kpi.color}`}>
+                <Icon size={16} />
+              </div>
+              <div className="stat-content">
+                <div className="stat-value">{kpi.value}</div>
+                <div className="stat-label">{kpi.label}</div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Controls */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 'var(--space-4)', flexWrap: 'wrap', alignItems: 'center' }}>
-        <div style={{ flex: 1, maxWidth: 380, display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 10, padding: '8px 14px' }}>
-          <Search size={14} color="rgba(255,255,255,0.3)" />
+      {/* Controls Bar */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        gap: 12, marginBottom: 'var(--s4)', flexWrap: 'wrap'
+      }}>
+        <div style={{ position: 'relative', width: 320 }}>
+          <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
           <input
             placeholder="Search by ID, zone, type, subsystem..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'white', fontSize: 13 }}
+            style={{ paddingLeft: 32 }}
           />
         </div>
-        <div style={{ display: 'flex', gap: 6 }}>
-          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', alignSelf: 'center', marginRight: 4 }}>Group by:</span>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase' }}>Group by:</span>
           {['system', 'floor', 'type', 'status'].map(g => (
             <button
               key={g}
               onClick={() => setGroupBy(g)}
-              style={{
-                padding: '6px 14px', borderRadius: 8, fontSize: 11, fontWeight: 600,
-                cursor: 'pointer', textTransform: 'capitalize',
-                border: groupBy === g ? '1px solid rgba(0,212,170,0.4)' : '1px solid rgba(255,255,255,0.08)',
-                background: groupBy === g ? 'rgba(0,212,170,0.12)' : 'transparent',
-                color: groupBy === g ? '#00d4aa' : 'rgba(255,255,255,0.4)',
-                transition: 'all 0.15s',
-              }}
-            >{g}</button>
+              className={`btn btn-xs ${groupBy === g ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ fontSize: 11, textTransform: 'capitalize' }}
+            >
+              {g}
+            </button>
           ))}
         </div>
       </div>
 
-      {/* Grouped Asset Tables */}
-      {groups.map(([group, items]) => (
-        <div key={group} style={{ marginBottom: 'var(--space-5)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <div style={{ width: 3, height: 18, background: 'linear-gradient(180deg, #00d4aa, #0ea5e9)', borderRadius: 2 }} />
-            <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', margin: 0 }}>{group}</h3>
-            <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 6, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.45)', fontFamily: 'monospace' }}>{items.length} units</span>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                  {['Asset ID', 'Type', 'Location', 'Status', 'Health', 'Power', 'Protocol', 'Last Update'].map(h => (
-                    <th key={h} style={{ padding: '8px 14px', textAlign: 'left', fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', background: 'rgba(0,0,0,0.2)', whiteSpace: 'nowrap' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((eq, idx) => {
-                  const sc = STATUS_CFG[eq.status] || STATUS_CFG.offline;
-                  const healthColor = eq.health >= 80 ? '#10b981' : eq.health >= 50 ? '#f59e0b' : '#ef4444';
-                  return (
-                    <tr
-                      key={eq.id}
-                      onClick={() => onSelectEquipment(eq)}
-                      style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'background 0.15s' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                    >
-                      <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontSize: 11, color: '#00d4aa', fontWeight: 700 }}>{eq.id}</td>
-                      <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>{eq.type}</td>
-                      <td style={{ padding: '10px 14px', color: 'var(--text-tertiary)', fontSize: 11 }}>{eq.zone} ({eq.floor})</td>
-                      <td style={{ padding: '10px 14px' }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9, fontWeight: 700, padding: '3px 8px', borderRadius: 4, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>
-                          <span style={{ width: 5, height: 5, borderRadius: '50%', background: sc.color, display: 'inline-block' }} />
-                          {eq.status.toUpperCase()}
-                        </span>
-                      </td>
-                      <td style={{ padding: '10px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <div style={{ width: 44, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2, overflow: 'hidden' }}>
-                            <div style={{ height: '100%', width: `${eq.health}%`, background: healthColor, borderRadius: 2 }} />
+      {/* Grouped Assets Accordions / Tables */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--s4)' }}>
+        {groups.map(([groupName, items]) => (
+          <div key={groupName} className="card" style={{ padding: 0, overflow: 'hidden' }}>
+            <div style={{
+              padding: 'var(--s3) var(--s4)', borderBottom: '1px solid var(--border)',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              background: 'var(--bg-overlay)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-1)', fontFamily: 'var(--mono)' }}>
+                  {groupName}
+                </span>
+                <span className="badge badge-operational">
+                  {items.length} Units
+                </span>
+              </div>
+              <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                Avg Health: {(items.reduce((a, b) => a + (b.health || 95), 0) / items.length).toFixed(0)}%
+              </span>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Equipment ID</th>
+                    <th>Type / Family</th>
+                    <th>Location / Zone</th>
+                    <th>Subsystem</th>
+                    <th>Health Score</th>
+                    <th>Mode</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map(eq => {
+                    const statusBadge =
+                      eq.status === 'operational' ? 'badge-operational' :
+                      eq.status === 'warning' ? 'badge-warning' :
+                      eq.status === 'critical' ? 'badge-critical' : 'badge-offline';
+
+                    const healthColor =
+                      (eq.health || 95) >= 95 ? 'var(--green)' :
+                      (eq.health || 95) >= 85 ? 'var(--yellow)' : 'var(--red)';
+
+                    return (
+                      <tr key={eq.id}>
+                        <td style={{ fontFamily: 'var(--mono)', fontWeight: 700, color: 'var(--accent)' }}>
+                          {eq.id}
+                        </td>
+                        <td style={{ fontWeight: 500, color: 'var(--text-1)' }}>
+                          {eq.type}
+                        </td>
+                        <td style={{ color: 'var(--text-2)' }}>
+                          {eq.floor} • {eq.zone}
+                        </td>
+                        <td style={{ fontFamily: 'var(--mono)', color: 'var(--text-3)' }}>
+                          {eq.system}
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, fontWeight: 700, color: healthColor, width: 36 }}>
+                              {eq.health || 95}%
+                            </span>
+                            <div style={{ width: 48, height: 4, background: 'var(--bg-overlay)', borderRadius: 2, overflow: 'hidden' }}>
+                              <div style={{ width: `${eq.health || 95}%`, height: '100%', background: healthColor, borderRadius: 2 }} />
+                            </div>
                           </div>
-                          <span style={{ fontFamily: 'monospace', fontSize: 11, color: healthColor }}>{eq.health}%</span>
-                        </div>
-                      </td>
-                      <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontSize: 11, color: 'var(--text-tertiary)' }}>{eq.power !== null ? `${eq.power} kW` : '—'}</td>
-                      <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontSize: 11, color: '#38bdf8' }}>{eq.comm}</td>
-                      <td style={{ padding: '10px 14px', fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{eq.lastUpdate}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        </td>
+                        <td style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-2)' }}>
+                          {eq.mode || 'Auto'}
+                        </td>
+                        <td>
+                          <span className={`badge ${statusBadge}`}>
+                            {eq.status.toUpperCase()}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-ghost btn-xs"
+                            onClick={() => onSelectEquipment?.(eq)}
+                            style={{ fontSize: 11 }}
+                          >
+                            Inspect
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

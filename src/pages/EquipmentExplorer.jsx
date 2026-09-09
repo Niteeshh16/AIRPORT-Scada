@@ -1,21 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, Eye, Cpu, Activity, Filter } from 'lucide-react';
+import { Search, Cpu, Activity, Filter, Eye, AlertTriangle } from 'lucide-react';
 import { useLiveData } from '../context/LiveDataContext';
-
-const STATUS_CFG = {
-  operational: { color: '#10b981', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.3)' },
-  warning:     { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)' },
-  critical:    { color: '#ef4444', bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.3)' },
-  offline:     { color: '#8b92a5', bg: 'rgba(139,146,165,0.1)', border: 'rgba(139,146,165,0.2)' },
-};
-
-const QUICK_FILTERS = [
-  { label: 'Critical Faults', filter: { status: 'critical' } },
-  { label: 'Warnings',        filter: { status: 'warning' } },
-  { label: 'HVAC (LBMS)',     filter: { system: 'LBMS' } },
-  { label: 'BHS',             filter: { system: 'BHS' } },
-  { label: 'Offline',         filter: { status: 'offline' } },
-];
 
 export default function EquipmentExplorer({ onSelectEquipment }) {
   const { equipmentList, subsystems, floors } = useLiveData();
@@ -34,13 +19,6 @@ export default function EquipmentExplorer({ onSelectEquipment }) {
     return true;
   }), [equipmentList, searchQuery, filterSystem, filterFloor, filterStatus]);
 
-  const applyQuickFilter = (f) => {
-    setFilterSystem(f.system || 'all');
-    setFilterStatus(f.status || 'all');
-    setFilterFloor(f.floor || 'all');
-    setSearchQuery('');
-  };
-
   const counts = {
     operational: equipmentList.filter(e => e.status === 'operational').length,
     warning:     equipmentList.filter(e => e.status === 'warning').length,
@@ -49,157 +27,203 @@ export default function EquipmentExplorer({ onSelectEquipment }) {
   };
 
   return (
-    <div className="animate-fadeIn" style={{ padding: 'var(--space-5)' }}>
-
+    <div className="page animate-fadeIn">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 'var(--space-4)', flexWrap: 'wrap', gap: 12 }}>
+      <div className="page-header">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <div style={{ width: 4, height: 28, background: 'linear-gradient(180deg, #38bdf8, #a78bfa)', borderRadius: 2 }} />
-            <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>Equipment Explorer & Diagnostics</h1>
-          </div>
-          <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: 0, paddingLeft: 14 }}>
-            LTIA Terminal 1 · Search, filter and inspect all {equipmentList.length} monitored industrial assets
+          <h1 className="page-title">Equipment Explorer & Device Diagnostics</h1>
+          <p className="page-subtitle">
+            Long Thanh International Airport (LTIA) • Search, filter and inspect {equipmentList.length} monitored industrial field assets
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(56,189,248,0.08)', border: '1px solid rgba(56,189,248,0.2)', borderRadius: 10, padding: '8px 14px' }}>
-          <Cpu size={14} color="#38bdf8" />
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#38bdf8', fontFamily: 'monospace' }}>{filtered.length} / {equipmentList.length} in view</span>
+        <div className="page-actions">
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: 'var(--bg-surface)', border: '1px solid var(--border)',
+            padding: '6px 12px', borderRadius: 'var(--r-md)', fontSize: 12, color: 'var(--accent)'
+          }}>
+            <Cpu size={13} />
+            <span style={{ fontFamily: 'var(--mono)', fontWeight: 700 }}>{filtered.length} / {equipmentList.length} Visible</span>
+          </div>
         </div>
       </div>
 
-      {/* Status Summary Pills */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 'var(--space-4)', flexWrap: 'wrap' }}>
-        {Object.entries(counts).map(([status, count]) => {
-          const cfg = STATUS_CFG[status];
-          const isActive = filterStatus === status;
+      {/* Status Filter Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--s3)', marginBottom: 'var(--s4)' }}>
+        {[
+          { key: 'operational', label: 'Operational Nodes', count: counts.operational, color: 'var(--green)', bg: 'var(--green-bg)' },
+          { key: 'warning', label: 'Warning Anomalies', count: counts.warning, color: 'var(--yellow)', bg: 'var(--yellow-bg)' },
+          { key: 'critical', label: 'Critical Faults', count: counts.critical, color: 'var(--red)', bg: 'var(--red-bg)' },
+          { key: 'offline', label: 'Offline / Disconnected', count: counts.offline, color: 'var(--text-3)', bg: 'var(--bg-overlay)' },
+        ].map(item => {
+          const isActive = filterStatus === item.key;
           return (
-            <button
-              key={status}
-              onClick={() => setFilterStatus(isActive ? 'all' : status)}
+            <div
+              key={item.key}
+              className="card"
+              onClick={() => setFilterStatus(isActive ? 'all' : item.key)}
               style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '8px 16px', borderRadius: 10,
-                background: isActive ? cfg.bg : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${isActive ? cfg.border : 'rgba(255,255,255,0.07)'}`,
-                cursor: 'pointer', transition: 'all 0.2s',
+                padding: 'var(--s3) var(--s4)',
+                cursor: 'pointer',
+                borderColor: isActive ? 'var(--accent)' : 'var(--border)',
+                background: isActive ? 'var(--bg-overlay)' : 'var(--bg-surface)',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between'
               }}
             >
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: cfg.color, display: 'inline-block' }} />
-              <span style={{ fontSize: 11, fontWeight: 700, color: cfg.color, textTransform: 'uppercase' }}>{status}</span>
-              <span style={{ fontSize: 16, fontWeight: 800, color: cfg.color, fontFamily: 'monospace' }}>{count}</span>
-            </button>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  {item.label}
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 700, fontFamily: 'var(--mono)', color: item.color, marginTop: 2 }}>
+                  {item.count}
+                </div>
+              </div>
+              <span style={{
+                width: 10, height: 10, borderRadius: '50%',
+                background: item.color, boxShadow: `0 0 8px ${item.color}`
+              }} />
+            </div>
           );
         })}
       </div>
 
       {/* Filter Bar */}
-      <div style={{ padding: '14px 16px', borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', marginBottom: 'var(--space-4)' }}>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+      <div className="card" style={{ padding: 'var(--s3) var(--s4)', marginBottom: 'var(--s4)' }}>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
           {/* Search */}
-          <div style={{ flex: 1, minWidth: 240, display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 8, padding: '8px 12px' }}>
-            <Search size={13} color="rgba(255,255,255,0.3)" />
+          <div style={{ position: 'relative', flex: 1, minWidth: 260 }}>
+            <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
             <input
-              placeholder="Search by ID, zone, type..."
+              placeholder="Search by ID, Zone, Type..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'white', fontSize: 12 }}
+              style={{ paddingLeft: 32 }}
             />
           </div>
 
-          {/* Dropdowns */}
-          {[
-            { label: 'Subsystem', value: filterSystem, setter: setFilterSystem, opts: [{ v: 'all', l: 'All Subsystems' }, ...subsystems.map(s => ({ v: s.id, l: `${s.id} – ${s.name}` }))] },
-            { label: 'Floor', value: filterFloor, setter: setFilterFloor, opts: [{ v: 'all', l: 'All Floors' }, ...floors.map(f => ({ v: f.id, l: f.name }))] },
-            { label: 'Status', value: filterStatus, setter: setFilterStatus, opts: [{ v: 'all', l: 'All Status' }, { v: 'operational', l: 'Operational' }, { v: 'warning', l: 'Warning' }, { v: 'critical', l: 'Critical' }, { v: 'offline', l: 'Offline' }] },
-          ].map(({ label, value, setter, opts }) => (
-            <div key={label} style={{ minWidth: 150 }}>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginBottom: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{label}</div>
-              <select
-                value={value}
-                onChange={e => setter(e.target.value)}
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 8, padding: '8px 10px', color: 'white', fontSize: 12, outline: 'none' }}
-              >
-                {opts.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
-              </select>
-            </div>
-          ))}
-        </div>
+          {/* Subsystem Select */}
+          <div style={{ width: 180 }}>
+            <select value={filterSystem} onChange={e => setFilterSystem(e.target.value)}>
+              <option value="all">All Subsystems</option>
+              {subsystems.map(s => (
+                <option key={s.id} value={s.id}>{s.id} - {s.name}</option>
+              ))}
+            </select>
+          </div>
 
-        {/* Quick Filters */}
-        <div style={{ marginTop: 10, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-          <SlidersHorizontal size={11} color="rgba(255,255,255,0.3)" />
-          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginRight: 4 }}>QUICK FILTERS:</span>
-          {QUICK_FILTERS.map((sf, i) => (
-            <button key={i} onClick={() => applyQuickFilter(sf.filter)} style={{ padding: '3px 10px', borderRadius: 6, fontSize: 10, cursor: 'pointer', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{sf.label}</button>
-          ))}
-          <button onClick={() => { setFilterSystem('all'); setFilterStatus('all'); setFilterFloor('all'); setSearchQuery(''); }} style={{ padding: '3px 10px', borderRadius: 6, fontSize: 10, cursor: 'pointer', background: 'transparent', border: '1px dashed rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.35)' }}>Reset</button>
+          {/* Floor Select */}
+          <div style={{ width: 140 }}>
+            <select value={filterFloor} onChange={e => setFilterFloor(e.target.value)}>
+              <option value="all">All Floors</option>
+              {floors.map(f => (
+                <option key={f.id} value={f.id}>{f.id} ({f.label})</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Reset Filters */}
+          {(filterSystem !== 'all' || filterFloor !== 'all' || filterStatus !== 'all' || searchQuery) && (
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => {
+                setFilterSystem('all');
+                setFilterFloor('all');
+                setFilterStatus('all');
+                setSearchQuery('');
+              }}
+            >
+              Reset Filters
+            </button>
+          )}
         </div>
       </div>
 
       {/* Equipment Table */}
-      <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-              {['Equipment ID', 'Type', 'System', 'Floor', 'Zone', 'Status', 'Health', 'Mode', 'Last Update', ''].map(h => (
-                <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', background: 'rgba(0,0,0,0.2)', whiteSpace: 'nowrap' }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((eq, idx) => {
-              const sc = STATUS_CFG[eq.status] || STATUS_CFG.offline;
-              const healthColor = eq.health >= 80 ? '#10b981' : eq.health >= 50 ? '#f59e0b' : '#ef4444';
-              return (
-                <tr
-                  key={eq.id}
-                  onClick={() => onSelectEquipment(eq)}
-                  style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'background 0.15s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                >
-                  <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontSize: 11, color: '#00d4aa', fontWeight: 700 }}>{eq.id}</td>
-                  <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>{eq.type}</td>
-                  <td style={{ padding: '10px 14px' }}>
-                    <span style={{ fontFamily: 'monospace', fontSize: 10, fontWeight: 700, color: '#38bdf8', background: 'rgba(56,189,248,0.1)', padding: '2px 6px', borderRadius: 4 }}>{eq.system}</span>
-                  </td>
-                  <td style={{ padding: '10px 14px', fontSize: 11, color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace' }}>{eq.floor}</td>
-                  <td style={{ padding: '10px 14px', fontSize: 11, color: 'var(--text-tertiary)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{eq.zone}</td>
-                  <td style={{ padding: '10px 14px' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 4, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>
-                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: sc.color }} />
-                      {eq.status.toUpperCase()}
-                    </span>
-                  </td>
-                  <td style={{ padding: '10px 14px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <div style={{ width: 40, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2, overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${eq.health}%`, background: healthColor, borderRadius: 2 }} />
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Equipment ID</th>
+                <th>Type / Description</th>
+                <th>Subsystem</th>
+                <th>Location</th>
+                <th>Health Score</th>
+                <th>Mode</th>
+                <th>Live Telemetry</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.slice(0, 100).map(eq => {
+                const statusBadge =
+                  eq.status === 'operational' ? 'badge-operational' :
+                  eq.status === 'warning' ? 'badge-warning' :
+                  eq.status === 'critical' ? 'badge-critical' : 'badge-offline';
+
+                const healthColor =
+                  eq.health >= 90 ? 'var(--green)' :
+                  eq.health >= 75 ? 'var(--yellow)' : 'var(--red)';
+
+                return (
+                  <tr key={eq.id}>
+                    <td style={{ fontFamily: 'var(--mono)', fontWeight: 700, color: 'var(--accent)' }}>
+                      {eq.id}
+                    </td>
+                    <td style={{ fontWeight: 500, color: 'var(--text-1)' }}>
+                      {eq.type}
+                    </td>
+                    <td style={{ fontFamily: 'var(--mono)', color: 'var(--text-2)' }}>
+                      {eq.system}
+                    </td>
+                    <td style={{ color: 'var(--text-2)' }}>
+                      {eq.floor} • {eq.zone}
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontFamily: 'var(--mono)', fontSize: 11, fontWeight: 700, color: healthColor, width: 34 }}>
+                          {eq.health}%
+                        </span>
+                        <div style={{ width: 44, height: 4, background: 'var(--bg-overlay)', borderRadius: 2, overflow: 'hidden' }}>
+                          <div style={{ width: `${eq.health}%`, height: '100%', background: healthColor, borderRadius: 2 }} />
+                        </div>
                       </div>
-                      <span style={{ fontFamily: 'monospace', fontSize: 11, color: healthColor }}>{eq.health}%</span>
-                    </div>
-                  </td>
-                  <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>{eq.mode}</td>
-                  <td style={{ padding: '10px 14px', fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{eq.lastUpdate}</td>
-                  <td style={{ padding: '10px 14px' }}>
-                    <button
-                      onClick={e => { e.stopPropagation(); onSelectEquipment(eq); }}
-                      style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.25)', color: '#38bdf8', cursor: 'pointer' }}
-                    >
-                      <Eye size={10} /> Inspect
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        {filtered.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '48px 0', color: 'rgba(255,255,255,0.25)', fontSize: 13 }}>
-            No equipment matches your filters. Try adjusting your search criteria.
-          </div>
-        )}
+                    </td>
+                    <td style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-2)' }}>
+                      {eq.mode || 'Auto'}
+                    </td>
+                    <td style={{ fontFamily: 'var(--mono)', fontSize: 11 }}>
+                      {eq.temp !== null && eq.temp !== undefined ? (
+                        <span style={{ color: 'var(--accent)' }}>{eq.temp}°C </span>
+                      ) : null}
+                      {eq.fanRPM !== null && eq.fanRPM !== undefined ? (
+                        <span style={{ color: 'var(--text-2)' }}>{eq.fanRPM} RPM </span>
+                      ) : null}
+                      {eq.power !== null && eq.power !== undefined ? (
+                        <span style={{ color: 'var(--text-3)' }}>{eq.power} kW</span>
+                      ) : null}
+                    </td>
+                    <td>
+                      <span className={`badge ${statusBadge}`}>
+                        {eq.status.toUpperCase()}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-secondary btn-xs"
+                        onClick={() => onSelectEquipment?.(eq)}
+                        style={{ fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 3 }}
+                      >
+                        <Eye size={11} /> Inspect
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
