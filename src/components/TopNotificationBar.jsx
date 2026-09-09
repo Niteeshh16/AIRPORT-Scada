@@ -1,136 +1,134 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  AlertTriangle, AlertOctagon, X, Check, ArrowRight, Bell, 
-  ChevronLeft, ChevronRight, ShieldAlert, ExternalLink 
+  AlertTriangle, AlertOctagon, X, Check, ArrowRight, 
+  ChevronLeft, ChevronRight, Bell
 } from 'lucide-react';
-import { useLiveData } from '../context/LiveDataContext';
 import { useNavigate } from 'react-router-dom';
 
-export default function TopNotificationBar({ onSelectEquipment }) {
-  const { alerts, acknowledgeAlert, equipmentList } = useLiveData();
-  const navigate = useNavigate();
-  const [dismissedIds, setDismissedIds] = useState(new Set());
+const RECENT_ALERTS_MOCK = [
+  {
+    id: 'ALT-01',
+    system: 'BHS',
+    severity: 'critical',
+    title: 'Conveyor jam detected in sorting unit 3',
+    time: '24m ago',
+  },
+  {
+    id: 'ALT-02',
+    system: 'BHS',
+    severity: 'critical',
+    title: 'Baggage tag scan failure rate > 5% threshold',
+    time: '27m ago',
+  },
+  {
+    id: 'ALT-03',
+    system: 'SCADA',
+    severity: 'high',
+    title: 'Lighting control fault in apron zone 5 (SCADA)',
+    time: '31m ago',
+  },
+  {
+    id: 'ALT-04',
+    system: 'LBMS',
+    severity: 'medium',
+    title: 'Temperature deviation in Zone 2 (26.5°C, target 24°C)',
+    time: '37m ago',
+  },
+  {
+    id: 'ALT-05',
+    system: 'SCADA',
+    severity: 'medium',
+    title: 'Power consumption spike in HDR-12 (>82% capacity)',
+    time: '44m ago',
+  },
+];
+
+export default function TopNotificationBar() {
+  const [alerts, setAlerts] = useState(RECENT_ALERTS_MOCK);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const navigate = useNavigate();
 
-  // Active unacknowledged critical and high alerts
-  const activeAlerts = alerts.filter(
-    a => (a.severity === 'critical' || a.severity === 'high') && !a.acknowledged && !dismissedIds.has(a.id)
-  );
-
-  // Keep currentIndex in bounds when alerts change
-  useEffect(() => {
-    if (currentIndex >= activeAlerts.length && activeAlerts.length > 0) {
-      setCurrentIndex(activeAlerts.length - 1);
-    }
-  }, [activeAlerts.length, currentIndex]);
-
-  if (activeAlerts.length === 0) {
+  if (alerts.length === 0) {
     return null;
   }
 
-  const currentAlert = activeAlerts[currentIndex] || activeAlerts[0];
+  const currentAlert = alerts[currentIndex] || alerts[0];
   const isCritical = currentAlert.severity === 'critical';
-
-  const handleDismiss = (id) => {
-    setDismissedIds(prev => new Set([...prev, id]));
-  };
+  const isHigh = currentAlert.severity === 'high';
 
   const handleAck = (id) => {
-    acknowledgeAlert(id);
-    handleDismiss(id);
-  };
-
-  const handleInspect = (eqId) => {
-    if (onSelectEquipment && eqId) {
-      const eq = equipmentList.find(e => e.id === eqId || e.tag === eqId);
-      if (eq) {
-        onSelectEquipment(eq);
-        return;
-      }
+    setAlerts(prev => prev.filter(a => a.id !== id));
+    if (currentIndex >= alerts.length - 1 && currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1);
     }
-    navigate('/alerts');
   };
 
   const nextAlert = () => {
-    setCurrentIndex(prev => (prev + 1) % activeAlerts.length);
+    setCurrentIndex(prev => (prev + 1) % alerts.length);
   };
 
   const prevAlert = () => {
-    setCurrentIndex(prev => (prev - 1 + activeAlerts.length) % activeAlerts.length);
+    setCurrentIndex(prev => (prev - 1 + alerts.length) % alerts.length);
   };
 
   return (
-    <div className="top-notification-banner animate-slideInDown">
-      <div className={`top-notification-inner ${isCritical ? 'critical' : 'warning'}`}>
+    <div className="reference-top-notif-bar animate-slideInDown">
+      <div className={`ref-notif-inner ${currentAlert.severity}`}>
         
-        {/* Left: Glowing Icon & Severity Badge */}
-        <div className="top-notif-left">
-          <div className={`top-notif-icon-box ${isCritical ? 'critical' : 'warning'}`}>
-            {isCritical ? <AlertOctagon size={16} className="pulse-fast" /> : <AlertTriangle size={16} />}
-          </div>
-          <span className={`top-notif-badge ${isCritical ? 'critical' : 'warning'}`}>
-            {currentAlert.severity.toUpperCase()} ALARM
+        {/* Left Badge & System */}
+        <div className="flex items-center gap-2 shrink-0">
+          <div className={`ref-notif-pulse-dot ${currentAlert.severity}`} />
+          <span className="font-mono text-xs font-bold text-white uppercase tracking-wider">
+            RECENT ALERTS ({alerts.length})
+          </span>
+          <span className={`ref-notif-sys-tag ${currentAlert.severity}`}>
+            {currentAlert.system} {currentAlert.severity.toUpperCase()}
           </span>
         </div>
 
-        {/* Center: Alarm Message, Tag, and Location */}
-        <div className="top-notif-center">
-          <span className="top-notif-tag font-mono">{currentAlert.equipment}</span>
-          <span className="top-notif-divider">•</span>
-          <span className="top-notif-msg">{currentAlert.message}</span>
-          <span className="top-notif-divider">•</span>
-          <span className="top-notif-time font-mono">{currentAlert.time}</span>
+        {/* Center: Message */}
+        <div className="ref-notif-msg-box truncate">
+          <span className="ref-notif-msg">{currentAlert.title}</span>
+          <span className="ref-notif-time font-mono">({currentAlert.time})</span>
         </div>
 
-        {/* Right: Pager (if multiple) & Quick Actions */}
-        <div className="top-notif-right">
-          {activeAlerts.length > 1 && (
-            <div className="top-notif-pager">
-              <button 
-                onClick={prevAlert} 
-                className="top-notif-pager-btn" 
-                title="Previous Alarm"
-              >
+        {/* Right: Pager & Actions */}
+        <div className="flex items-center gap-2 shrink-0">
+          {alerts.length > 1 && (
+            <div className="ref-notif-pager">
+              <button onClick={prevAlert} className="ref-notif-pager-btn" title="Previous Alert">
                 <ChevronLeft size={13} />
               </button>
               <span className="font-mono text-3xs text-secondary font-bold">
-                {currentIndex + 1} / {activeAlerts.length}
+                {currentIndex + 1} / {alerts.length}
               </span>
-              <button 
-                onClick={nextAlert} 
-                className="top-notif-pager-btn" 
-                title="Next Alarm"
-              >
+              <button onClick={nextAlert} className="ref-notif-pager-btn" title="Next Alert">
                 <ChevronRight size={13} />
               </button>
             </div>
           )}
 
-          {/* Acknowledge Button */}
           <button
             onClick={() => handleAck(currentAlert.id)}
-            className="top-notif-ack-btn"
-            title="Acknowledge this alarm"
+            className="ref-notif-ack-btn"
+            title="Acknowledge Alert"
           >
-            <Check size={13} />
+            <Check size={12} />
             <span>ACK</span>
           </button>
 
-          {/* View in Alerts Page */}
           <button
-            onClick={() => handleInspect(currentAlert.equipment)}
-            className="top-notif-view-btn"
-            title="View Alarm Center"
+            onClick={() => navigate('/alerts')}
+            className="ref-notif-all-btn"
+            title="Open Alerts Center"
           >
-            <span>Details</span>
-            <ArrowRight size={12} />
+            <span>All Alerts →</span>
           </button>
 
-          {/* Dismiss Banner Button */}
           <button
-            onClick={() => handleDismiss(currentAlert.id)}
-            className="top-notif-dismiss-btn"
-            title="Dismiss top notification"
+            onClick={() => handleAck(currentAlert.id)}
+            className="ref-notif-close-btn"
+            title="Dismiss notification"
           >
             <X size={14} />
           </button>

@@ -39,7 +39,7 @@ export default function Header({ currentTime, moduleName, onToggleSidebar }) {
 
   return (
     <header className="app-header">
-      {/* Left: Hamburger + Title + Breadcrumb */}
+      {/* Left: Hamburger + Title + Breadcrumb matching reference image */}
       <div className="header-left">
         <button
           className="header-hamburger"
@@ -49,12 +49,12 @@ export default function Header({ currentTime, moduleName, onToggleSidebar }) {
           <Menu size={18} />
         </button>
 
-        <span className="header-airport-name font-mono">LONG THANH HBMS</span>
-        <div className="header-divider" />
-        <span className="header-module-name font-mono">{moduleName}</span>
+        <span className="header-airport-name font-mono">LONG THANH AIRPORT HBMS</span>
+        <span className="text-zinc-600 mx-1.5 font-mono">/</span>
+        <span className="text-zinc-400 font-mono text-xs">{moduleName}</span>
       </div>
 
-      {/* Right: Protocol status + Clock + Notifications Bell + Profile */}
+      {/* Right: Protocol status + Clock + Theme toggle + Notifications Bell + Profile */}
       <div className="header-right" style={{ position: 'relative' }}>
         {/* Network & Protocol Status */}
         <div className="header-status live">
@@ -66,6 +66,11 @@ export default function Header({ currentTime, moduleName, onToggleSidebar }) {
         <div className="header-clock font-mono">
           <span>{timeStr}</span>
         </div>
+
+        {/* Theme Sun Toggle */}
+        <button className="header-icon-btn" title="Toggle Theme (Dark Industrial SCADA)">
+          <Sun size={16} className="text-zinc-400 hover:text-white transition-colors" />
+        </button>
 
         {/* Top Notifications Bell Button & Dropdown Anchor */}
         <div ref={dropdownRef} style={{ position: 'relative' }}>

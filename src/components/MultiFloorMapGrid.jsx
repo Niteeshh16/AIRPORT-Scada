@@ -1,115 +1,112 @@
-import React from 'react';
-import { 
-  Activity, AlertTriangle, CheckCircle2, Wind, Thermometer, 
-  Droplets, Zap, ChevronRight, Maximize2 
-} from 'lucide-react';
-import { useLiveData } from '../context/LiveDataContext';
+import React, { useState } from 'react';
+import { Maximize2, AlertCircle } from 'lucide-react';
 
-// 29-Zone Geometric Definitions for Long Thanh Terminal 1
-// Matching the official SCADA schematic
+// Exact 29-Zone Geometric Schematic from the Reference Image
 const NORTH_PIER_ZONES = [
-  { id: '37', x: 210, y: 32, w: 24, h: 19 },
-  { id: '36', x: 210, y: 53, w: 24, h: 19 },
-  { id: '35', x: 210, y: 74, w: 24, h: 19 },
-  { id: '34', x: 210, y: 95, w: 24, h: 19 },
-  { id: '33', x: 210, y: 116, w: 24, h: 19 },
+  { id: '37', x: 210, y: 32, w: 22, h: 15 },
+  { id: '36', x: 210, y: 51, w: 22, h: 15 },
+  { id: '35', x: 210, y: 70, w: 22, h: 15 },
+  { id: '34', x: 210, y: 89, w: 22, h: 15 },
+  { id: '33', x: 210, y: 108, w: 22, h: 15 },
 ];
 
 const WEST_PIER_ZONES = [
-  { id: '24', x: 55, y: 115, w: 26, h: 17, rot: -20 },
-  { id: '23', x: 88, y: 127, w: 26, h: 17, rot: -20 },
-  { id: '22', x: 121, y: 139, w: 26, h: 17, rot: -20 },
-  { id: '21', x: 154, y: 151, w: 26, h: 17, rot: -20 },
+  { id: '24', x: 64, y: 106, w: 24, h: 15, rot: -23 },
+  { id: '23', x: 96, y: 119, w: 24, h: 15, rot: -23 },
+  { id: '22', x: 128, y: 132, w: 24, h: 15, rot: -23 },
+  { id: '21', x: 160, y: 145, w: 24, h: 15, rot: -23 },
 ];
 
 const EAST_PIER_ZONES = [
-  { id: '44', x: 365, y: 115, w: 26, h: 17, rot: 20 },
-  { id: '43', x: 332, y: 127, w: 26, h: 17, rot: 20 },
-  { id: '42', x: 299, y: 139, w: 26, h: 17, rot: 20 },
-  { id: '41', x: 266, y: 151, w: 26, h: 17, rot: 20 },
+  { id: '44', x: 356, y: 106, w: 24, h: 15, rot: 23 },
+  { id: '43', x: 324, y: 119, w: 24, h: 15, rot: 23 },
+  { id: '42', x: 292, y: 132, w: 24, h: 15, rot: 23 },
+  { id: '41', x: 260, y: 145, w: 24, h: 15, rot: 23 },
 ];
 
 const HUB_UPPER_ZONES = [
-  { id: '31', x: 175, y: 152, w: 14, h: 17 },
-  { id: '11', x: 188, y: 152, w: 12, h: 17 },
-  { id: '12', x: 199, y: 152, w: 11, h: 17 },
-  { id: '13', x: 210, y: 152, w: 12, h: 17 },
-  { id: '14', x: 221, y: 152, w: 11, h: 17 },
-  { id: '15', x: 232, y: 152, w: 12, h: 17 },
-  { id: '32', x: 245, y: 152, w: 14, h: 17 },
+  { id: '31', x: 176, y: 148, w: 14, h: 15 },
+  { id: '11', x: 189, y: 148, w: 11, h: 15 },
+  { id: '12', x: 200, y: 148, w: 10, h: 15 },
+  { id: '13', x: 210, y: 148, w: 10, h: 15 },
+  { id: '14', x: 220, y: 148, w: 10, h: 15 },
+  { id: '15', x: 231, y: 148, w: 11, h: 15 },
+  { id: '32', x: 244, y: 148, w: 14, h: 15 },
 ];
 
 const HUB_MIDDLE_ZONES = [
-  { id: '01', x: 177, y: 182, w: 18, h: 19 },
-  { id: '02', x: 196, y: 182, w: 18, h: 19 },
-  { id: '03', x: 210, y: 182, w: 18, h: 19 },
-  { id: '04', x: 224, y: 182, w: 18, h: 19 },
-  { id: '05', x: 243, y: 182, w: 18, h: 19 },
+  { id: '01', x: 177, y: 174, w: 18, h: 17 },
+  { id: '02', x: 195, y: 174, w: 18, h: 17 },
+  { id: '03', x: 210, y: 174, w: 18, h: 17 },
+  { id: '04', x: 225, y: 174, w: 18, h: 17 },
+  { id: '05', x: 243, y: 174, w: 18, h: 17 },
 ];
 
 const HUB_LOWER_ZONES = [
-  { id: '51', x: 177, y: 212, w: 18, h: 17 },
-  { id: '52', x: 196, y: 212, w: 18, h: 17 },
-  { id: '53', x: 210, y: 212, w: 18, h: 17 },
-  { id: '54', x: 224, y: 212, w: 18, h: 17 },
-  { id: '55', x: 243, y: 212, w: 18, h: 17 },
+  { id: '51', x: 177, y: 198, w: 18, h: 15 },
+  { id: '52', x: 195, y: 198, w: 18, h: 15 },
+  { id: '53', x: 210, y: 198, w: 18, h: 15 },
+  { id: '54', x: 225, y: 198, w: 18, h: 15 },
+  { id: '55', x: 243, y: 198, w: 18, h: 15 },
 ];
 
-export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) {
+export function FloorSchematic({ hasAlert = false, alertZone = '23', onZoneClick }) {
   return (
     <svg
-      viewBox="0 0 420 250"
+      viewBox="40 18 340 200"
       width="100%"
       height="100%"
-      style={{ background: '#020408', display: 'block' }}
+      className="terminal-schematic-svg"
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
-        <pattern id="microGridBlueprint" width="20" height="20" patternUnits="userSpaceOnUse">
-          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.02)" strokeWidth="0.5" />
-        </pattern>
-        <filter id="zoneGlow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="2" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        <filter id="radarPulse" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
         </filter>
       </defs>
 
-      <rect width="420" height="250" fill="url(#microGridBlueprint)" />
+      {/* Background fill */}
+      <rect x="40" y="18" width="340" height="200" fill="#04060a" />
 
-      {/* Terminal Pier Structural Contours */}
-      <g stroke="rgba(255, 255, 255, 0.3)" strokeWidth="0.9" fill="none">
-        {/* North Pier Spire */}
-        <path d="M 198,22 L 222,22 L 222,126 L 198,126 Z" />
-
-        {/* West Wing Pier */}
-        <path d="M 42,107 L 167,152 L 161,170 L 36,125 Z" />
-
-        {/* East Wing Pier */}
-        <path d="M 378,107 L 253,152 L 259,170 L 384,125 Z" />
-
-        {/* Concourse Core */}
-        <path d="M 166,143 L 254,143 L 258,226 L 162,226 Z" stroke="rgba(255, 255, 255, 0.22)" strokeDasharray="3 2" />
-        <path d="M 162,226 L 258,226" stroke="rgba(56, 189, 248, 0.5)" strokeWidth="1.2" />
+      {/* Terminal Pier Architectural Spine Outline */}
+      <g stroke="rgba(255, 255, 255, 0.16)" strokeWidth="0.8" fill="none">
+        {/* North Pier Corridor */}
+        <path d="M 197,20 L 223,20 L 223,120 L 197,120 Z" />
+        {/* West Pier Wing */}
+        <path d="M 50,98 L 168,144 L 162,162 L 44,116 Z" />
+        {/* East Pier Wing */}
+        <path d="M 370,98 L 252,144 L 258,162 L 376,116 Z" />
+        {/* Central Terminal Concourse Outline */}
+        <path d="M 166,138 L 254,138 L 256,212 L 164,212 Z" strokeDasharray="3 2" />
+        <path d="M 164,212 L 256,212" stroke="rgba(255, 255, 255, 0.35)" strokeWidth="1" />
       </g>
 
-      {/* 1. North Pier Zones (37, 36, 35, 34, 33) */}
+      {/* 1. North Pier Zones */}
       {NORTH_PIER_ZONES.map(z => (
-        <g key={z.id}>
+        <g 
+          key={z.id} 
+          className="schematic-zone-node"
+          onClick={(e) => { e.stopPropagation(); onZoneClick?.(z.id); }}
+        >
           <rect
             x={z.x - z.w / 2}
             y={z.y - z.h / 2}
             width={z.w}
             height={z.h}
-            fill="rgba(15, 23, 42, 0.7)"
-            stroke="rgba(255, 255, 255, 0.2)"
+            fill="#0b0f19"
+            stroke="rgba(255, 255, 255, 0.22)"
             strokeWidth="0.75"
-            rx="2"
+            rx="1.5"
           />
           <text
             x={z.x}
             y={z.y}
             fill="#e2e8f0"
-            fontSize="9"
+            fontSize="8.5"
             fontWeight="600"
             fontFamily="'JetBrains Mono', monospace"
             textAnchor="middle"
@@ -120,26 +117,30 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
         </g>
       ))}
 
-      {/* 2. West Wing Pier Zones (24, 23, 22, 21) */}
+      {/* 2. West Wing Pier Zones */}
       {WEST_PIER_ZONES.map(z => {
-        const isFaulted = hasCritical && z.id === alertZone;
+        const isFaulted = hasAlert && z.id === alertZone;
         return (
-          <g key={z.id} transform={`rotate(${z.rot}, ${z.x}, ${z.y})`}>
+          <g 
+            key={z.id} 
+            transform={`rotate(${z.rot}, ${z.x}, ${z.y})`}
+            className={`schematic-zone-node ${isFaulted ? 'zone-faulted' : ''}`}
+            onClick={(e) => { e.stopPropagation(); onZoneClick?.(z.id); }}
+          >
             <rect
               x={z.x - z.w / 2}
               y={z.y - z.h / 2}
               width={z.w}
               height={z.h}
-              fill={isFaulted ? 'rgba(239, 68, 68, 0.25)' : 'rgba(15, 23, 42, 0.7)'}
-              stroke={isFaulted ? '#ef4444' : 'rgba(255, 255, 255, 0.2)'}
+              fill={isFaulted ? 'rgba(234, 88, 12, 0.4)' : '#0b0f19'}
+              stroke={isFaulted ? '#f97316' : 'rgba(255, 255, 255, 0.22)'}
               strokeWidth={isFaulted ? '1.5' : '0.75'}
-              rx="2"
-              filter={isFaulted ? 'url(#zoneGlow)' : undefined}
+              rx="1.5"
             />
             {isFaulted ? (
               <g>
-                <circle cx={z.x} cy={z.y} r="13" fill="rgba(239, 68, 68, 0.35)" className="pulse-ring-anim" />
-                <circle cx={z.x} cy={z.y} r="6.5" fill="#ef4444" />
+                <circle cx={z.x} cy={z.y} r="14" fill="rgba(249, 115, 22, 0.25)" className="scada-ping-pulse" />
+                <circle cx={z.x} cy={z.y} r="6.5" fill="#f97316" filter="url(#radarPulse)" />
                 <text
                   x={z.x}
                   y={z.y}
@@ -158,7 +159,7 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
                 x={z.x}
                 y={z.y}
                 fill="#e2e8f0"
-                fontSize="9"
+                fontSize="8.5"
                 fontWeight="600"
                 fontFamily="'JetBrains Mono', monospace"
                 textAnchor="middle"
@@ -171,44 +172,21 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
         );
       })}
 
-      {/* 3. East Wing Pier Zones (44, 43, 42, 41) */}
+      {/* 3. East Wing Pier Zones */}
       {EAST_PIER_ZONES.map(z => (
-        <g key={z.id} transform={`rotate(${z.rot}, ${z.x}, ${z.y})`}>
+        <g 
+          key={z.id} 
+          transform={`rotate(${z.rot}, ${z.x}, ${z.y})`}
+          className="schematic-zone-node"
+          onClick={(e) => { e.stopPropagation(); onZoneClick?.(z.id); }}
+        >
           <rect
             x={z.x - z.w / 2}
             y={z.y - z.h / 2}
             width={z.w}
             height={z.h}
-            fill="rgba(15, 23, 42, 0.7)"
-            stroke="rgba(255, 255, 255, 0.2)"
-            strokeWidth="0.75"
-            rx="2"
-          />
-          <text
-            x={z.x}
-            y={z.y}
-            fill="#e2e8f0"
-            fontSize="9"
-            fontWeight="600"
-            fontFamily="'JetBrains Mono', monospace"
-            textAnchor="middle"
-            dominantBaseline="central"
-          >
-            {z.id}
-          </text>
-        </g>
-      ))}
-
-      {/* 4. Concourse Core - Upper Hub Row */}
-      {HUB_UPPER_ZONES.map(z => (
-        <g key={z.id}>
-          <rect
-            x={z.x - z.w / 2}
-            y={z.y - z.h / 2}
-            width={z.w}
-            height={z.h}
-            fill="rgba(15, 23, 42, 0.7)"
-            stroke="rgba(255, 255, 255, 0.2)"
+            fill="#0b0f19"
+            stroke="rgba(255, 255, 255, 0.22)"
             strokeWidth="0.75"
             rx="1.5"
           />
@@ -216,7 +194,7 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
             x={z.x}
             y={z.y}
             fill="#e2e8f0"
-            fontSize="8"
+            fontSize="8.5"
             fontWeight="600"
             fontFamily="'JetBrains Mono', monospace"
             textAnchor="middle"
@@ -227,24 +205,60 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
         </g>
       ))}
 
-      {/* 5. Concourse Core - Middle Hub Row */}
+      {/* 4. Concourse Hub Upper Row */}
+      {HUB_UPPER_ZONES.map(z => (
+        <g 
+          key={z.id} 
+          className="schematic-zone-node"
+          onClick={(e) => { e.stopPropagation(); onZoneClick?.(z.id); }}
+        >
+          <rect
+            x={z.x - z.w / 2}
+            y={z.y - z.h / 2}
+            width={z.w}
+            height={z.h}
+            fill="#0b0f19"
+            stroke="rgba(255, 255, 255, 0.22)"
+            strokeWidth="0.75"
+            rx="1.5"
+          />
+          <text
+            x={z.x}
+            y={z.y}
+            fill="#e2e8f0"
+            fontSize="7.5"
+            fontWeight="600"
+            fontFamily="'JetBrains Mono', monospace"
+            textAnchor="middle"
+            dominantBaseline="central"
+          >
+            {z.id}
+          </text>
+        </g>
+      ))}
+
+      {/* 5. Concourse Hub Middle Row */}
       {HUB_MIDDLE_ZONES.map(z => (
-        <g key={z.id}>
+        <g 
+          key={z.id} 
+          className="schematic-zone-node"
+          onClick={(e) => { e.stopPropagation(); onZoneClick?.(z.id); }}
+        >
           <rect
             x={z.x - z.w / 2}
             y={z.y - z.h / 2}
             width={z.w}
             height={z.h}
-            fill="rgba(15, 23, 42, 0.7)"
-            stroke="rgba(255, 255, 255, 0.2)"
+            fill="#0b0f19"
+            stroke="rgba(255, 255, 255, 0.22)"
             strokeWidth="0.75"
-            rx="2"
+            rx="1.5"
           />
           <text
             x={z.x}
             y={z.y}
             fill="#e2e8f0"
-            fontSize="9"
+            fontSize="8.5"
             fontWeight="600"
             fontFamily="'JetBrains Mono', monospace"
             textAnchor="middle"
@@ -255,24 +269,28 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
         </g>
       ))}
 
-      {/* 6. Concourse Core - Lower Hub Row */}
+      {/* 6. Concourse Hub Lower Row */}
       {HUB_LOWER_ZONES.map(z => (
-        <g key={z.id}>
+        <g 
+          key={z.id} 
+          className="schematic-zone-node"
+          onClick={(e) => { e.stopPropagation(); onZoneClick?.(z.id); }}
+        >
           <rect
             x={z.x - z.w / 2}
             y={z.y - z.h / 2}
             width={z.w}
             height={z.h}
-            fill="rgba(15, 23, 42, 0.7)"
-            stroke="rgba(255, 255, 255, 0.2)"
+            fill="#0b0f19"
+            stroke="rgba(255, 255, 255, 0.22)"
             strokeWidth="0.75"
-            rx="2"
+            rx="1.5"
           />
           <text
             x={z.x}
             y={z.y}
             fill="#e2e8f0"
-            fontSize="9"
+            fontSize="8.5"
             fontWeight="600"
             fontFamily="'JetBrains Mono', monospace"
             textAnchor="middle"
@@ -286,183 +304,74 @@ export function TerminalSchematicSvg({ hasCritical = false, alertZone = '23' }) 
   );
 }
 
-export default function MultiFloorMapGrid({ selectedFloor, onSelectFloor, fullView = true, compact = false }) {
-  // Conforming to official LTIA LBMS Operational Screen 1 floor distribution & telemetry
-  const floorList = [
-    {
-      id: 'PIT',
-      code: 'PIT',
-      label: 'PIT Level',
-      desc: 'Sub-Basement & Utility Tunnels',
-      health: 100,
-      sla: '100%',
-      temp: '21.8°C',
-      rh: '48%',
-      ahu: '14 AHU',
-      fcu: '68 FCU',
-      elec: '40 ACB / 18 VCB',
-      faults: 0,
-    },
-    {
-      id: 'GF',
-      code: 'GF',
-      label: 'Ground Floor',
-      desc: 'Arrivals & Baggage Reclaim Hall',
-      health: 98.4,
-      sla: '98.4%',
-      temp: '23.1°C',
-      rh: '54%',
-      ahu: '109 AHU (9 Flt)',
-      fcu: '574 FCU',
-      elec: '23 CRAH / 114 Fans',
-      faults: 9,
-    },
-    {
-      id: '1F',
-      code: '1F',
-      label: 'First Floor',
-      desc: 'Departures & Passenger Gates',
-      hasAlert: true,
-      alertZone: '23',
-      alertMsg: 'AHU-1F-04 Static Pressure Low',
-      health: 94.8,
-      sla: '94.8%',
-      temp: '24.2°C',
-      rh: '58%',
-      ahu: '43 AHU (2 Flt)',
-      fcu: '238 FCU',
-      elec: '60 Fans / 24 VDGS',
-      faults: 2,
-    },
-    {
-      id: '2F',
-      code: '2F',
-      label: 'Second Floor',
-      desc: 'Transfers & Airline VIP Lounges',
-      health: 99.1,
-      sla: '99.1%',
-      temp: '22.4°C',
-      rh: '51%',
-      ahu: '26 AHU (1 Flt)',
-      fcu: '325 FCU',
-      elec: '50 Fans / 32 SACS',
-      faults: 1,
-    },
-    {
-      id: '3F',
-      code: '3F',
-      label: 'Third Floor',
-      desc: 'Commercial & Duty-Free Gallery',
-      health: 98.8,
-      sla: '98.8%',
-      temp: '22.9°C',
-      rh: '53%',
-      ahu: '31 AHU (1 Flt)',
-      fcu: '236 FCU',
-      elec: '48 Fans / 18 VAV',
-      faults: 1,
-    },
-    {
-      id: '4F',
-      code: '4F',
-      label: 'Fourth Floor',
-      desc: 'HVAC Mechanical Plant & Penthouse',
-      health: 100,
-      sla: '100%',
-      temp: '25.0°C',
-      rh: '46%',
-      ahu: '11 AHU',
-      fcu: '86 FCU',
-      elec: '22 Fans / 8 DDC',
-      faults: 0,
-    },
+export default function MultiFloorMapGrid({ onSelectFloor, onMaximize, activeFloorId = '1F' }) {
+  const [selectedFloor, setSelectedFloor] = useState(activeFloorId);
+
+  // Exact 6 terminal levels from the reference image
+  const floors = [
+    { id: 'PIT', code: 'PIT', label: 'PIT Floor', hasAlert: false },
+    { id: 'GF', code: 'GF', label: 'Ground Floor', hasAlert: false },
+    { id: '1F', code: '1F', label: 'First Floor', hasAlert: true, alertZone: '23' },
+    { id: '2F', code: '2F', label: 'Second Floor', hasAlert: false },
+    { id: '3F', code: '3F', label: 'Third Floor', hasAlert: false },
+    { id: '4F', code: '4F', label: 'Fourth Floor', hasAlert: false, showMaximize: true },
   ];
 
-  return (
-    <div className={`multi-floor-grid ${fullView ? 'full-map-view' : ''} ${compact ? 'compact' : ''}`}>
-      {floorList.map(floor => {
-        const isSelected = selectedFloor === floor.id;
-        const hasCritical = Boolean(floor.hasAlert);
-        const statusColor = hasCritical ? '#ef4444' : floor.faults > 0 ? '#f59e0b' : '#22c55e';
+  const handleCardClick = (floor) => {
+    setSelectedFloor(floor.id);
+    onSelectFloor?.(floor.id);
+  };
 
+  return (
+    <div className="scada-floors-grid">
+      {floors.map(floor => {
+        const isSelected = selectedFloor === floor.id;
         return (
           <div
             key={floor.id}
-            className={`floor-tile-card ${isSelected ? 'selected' : ''} ${hasCritical ? 'has-critical' : ''}`}
-            onClick={() => onSelectFloor?.(floor.id)}
-            title={`Click to focus on ${floor.label} (${floor.desc})`}
+            className={`scada-floor-card ${floor.hasAlert ? 'floor-alert' : ''} ${isSelected ? 'floor-selected' : ''}`}
+            onClick={() => handleCardClick(floor)}
           >
-            {/* 1. Header: Floor Code Badge, Title, Description, and Live Status */}
-            <div className="floor-tile-header">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className={`floor-tile-badge ${hasCritical ? 'alert' : ''}`}>
-                  {floor.code}
-                </span>
-                <div className="flex flex-col min-w-0">
-                  <span className="floor-tile-name truncate">{floor.label}</span>
-                  <span className="floor-tile-desc text-3xs text-secondary truncate">{floor.desc}</span>
-                </div>
-              </div>
+            {/* Floor Badge Header */}
+            <div className="scada-floor-header">
+              <span className={`scada-floor-badge ${floor.hasAlert ? 'badge-alert' : ''}`}>
+                <span className="scada-floor-code">{floor.code}</span>
+                <span className="scada-floor-name">{floor.label}</span>
+              </span>
 
-              {/* Status Pill */}
-              {hasCritical ? (
-                <span className="floor-alert-pill">
-                  <span className="live-dot-badge red pulse-fast" style={{ width: 6, height: 6 }} />
-                  <span>ZONE {floor.alertZone} FAULT</span>
-                </span>
-              ) : (
-                <span className="floor-normal-pill">
-                  <span className="live-dot-badge green" style={{ width: 5, height: 5 }} />
-                  <span>{floor.sla} SLA</span>
-                </span>
+              {floor.hasAlert && (
+                <div className="scada-alert-zone-pill">
+                  <span className="pulse-dot-sm" />
+                  <span>Zone {floor.alertZone}</span>
+                </div>
               )}
             </div>
 
-            {/* 2. Interactive SVG Blueprint Diagram */}
-            <div className="floor-tile-blueprint">
-              <TerminalSchematicSvg hasCritical={hasCritical} alertZone={floor.alertZone || '23'} />
-              
-              {/* Overlay hover prompt */}
-              <div className="floor-blueprint-overlay">
-                <span>Click to Focus Floor</span>
-                <ChevronRight size={14} />
-              </div>
+            {/* Schematic SVG Container */}
+            <div className="scada-floor-svg-wrap">
+              <FloorSchematic 
+                hasAlert={floor.hasAlert} 
+                alertZone={floor.alertZone}
+                onZoneClick={(zoneId) => {
+                  handleCardClick(floor);
+                }}
+              />
             </div>
 
-            {/* 3. Operational Details Bar (Equipment Inventory & Ambient IEQ) */}
-            <div className="floor-tile-details">
-              <div className="floor-details-row">
-                <div className="floor-metric-chip" title="Air Handling Units">
-                  <Wind size={11} className="text-teal" />
-                  <span>{floor.ahu}</span>
-                </div>
-                <div className="floor-metric-chip" title="Fan Coil Units">
-                  <Activity size={11} className="text-blue" />
-                  <span>{floor.fcu}</span>
-                </div>
-                <div className="floor-metric-chip" title="Ambient Indoor Temperature">
-                  <Thermometer size={11} className="text-amber" />
-                  <span>{floor.temp}</span>
-                </div>
-                <div className="floor-metric-chip" title="Relative Humidity">
-                  <Droplets size={11} className="text-cyan" />
-                  <span>{floor.rh}</span>
-                </div>
-              </div>
-
-              {/* Floor Footer Strip: Subsystems & Health Progress */}
-              <div className="floor-details-footer">
-                <span className="text-3xs font-mono text-tertiary truncate">
-                  {floor.elec}
-                </span>
-                <span 
-                  className="font-mono text-3xs font-bold"
-                  style={{ color: statusColor }}
-                >
-                  {hasCritical ? 'FAULT' : `${floor.health}% HEALTH`}
-                </span>
-              </div>
-            </div>
+            {/* Maximize Button on Fourth Floor as in user image */}
+            {floor.showMaximize && (
+              <button
+                className="scada-maximize-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMaximize?.(floor.id);
+                }}
+                title="Maximize Map View"
+              >
+                <Maximize2 size={13} />
+                <span>Maximize</span>
+              </button>
+            )}
           </div>
         );
       })}

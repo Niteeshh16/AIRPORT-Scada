@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { LiveDataProvider } from './context/LiveDataContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import TopNotificationBar from './components/TopNotificationBar';
 import InspectionPanel from './components/InspectionPanel';
+import LoginPage from './pages/LoginPage';
 
 import CommandCenter from './pages/CommandCenter';
 import OperatorMode from './pages/OperatorMode';
@@ -21,7 +23,8 @@ import UserManagement from './pages/UserManagement';
 const DigitalTwin = lazy(() => import('./pages/DigitalTwin'));
 
 function AppContent() {
-  // Default to collapsed if viewport is laptop-width (< 1280px) to maximize operational room
+  const { currentUser, canAccess } = useAuth();
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.innerWidth < 1280);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [selectedEquipment, setSelectedEquipment] = useState(null);
@@ -35,12 +38,10 @@ function AppContent() {
     setMobileSidebarOpen(false);
   }, [location.pathname]);
 
-  // Window resize listener to intelligently adapt layout
+  // Window resize listener
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024 && mobileSidebarOpen) {
-        setMobileSidebarOpen(false);
-      }
+      if (window.innerWidth >= 1024 && mobileSidebarOpen) setMobileSidebarOpen(false);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -52,19 +53,19 @@ function AppContent() {
     return () => clearInterval(timer);
   }, []);
 
-  // Keyboard Shortcuts (M: Map/Command, A: Alerts, E: Equipment, O: Operator, S: Supervisor, Esc: Close)
+  // Keyboard Shortcuts
   useEffect(() => {
     const handler = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
-
+      if (!currentUser) return;
       switch (e.key.toLowerCase()) {
         case 'd': navigate('/digital-twin'); break;
         case 'm': navigate('/'); break;
         case 'a': navigate('/alerts'); break;
         case 'e': navigate('/equipment'); break;
-        case 'o': navigate('/operator-mode'); break;
-        case 's': navigate('/supervisor-mode'); break;
-        case 'escape': 
+        case 'o': if (canAccess('/operator-mode')) navigate('/operator-mode'); break;
+        case 's': if (canAccess('/supervisor-mode')) navigate('/supervisor-mode'); break;
+        case 'escape':
           setSelectedEquipment(null);
           setMobileSidebarOpen(false);
           break;
@@ -72,27 +73,24 @@ function AppContent() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [navigate]);
+  }, [navigate, canAccess, currentUser]);
 
-  const handleSelectEquipment = useCallback((eq) => {
-    setSelectedEquipment(eq);
-  }, []);
-
-  const handleCloseInspection = useCallback(() => {
-    setSelectedEquipment(null);
-  }, []);
+  const handleSelectEquipment = useCallback((eq) => setSelectedEquipment(eq), []);
+  const handleCloseInspection = useCallback(() => setSelectedEquipment(null), []);
 
   const handleToggleSidebar = () => {
-    if (window.innerWidth <= 1024) {
-      setMobileSidebarOpen(prev => !prev);
-    } else {
-      setSidebarCollapsed(prev => !prev);
-    }
+    if (window.innerWidth <= 1024) setMobileSidebarOpen(prev => !prev);
+    else setSidebarCollapsed(prev => !prev);
   };
+
+  // Show login page if not authenticated
+  if (!currentUser) {
+    return <LoginPage />;
+  }
 
   const getModuleName = () => {
     const path = location.pathname;
-    if (path === '/' || path === '/command-center') return 'Command Center';
+    if (path === '/' || path === '/command-center') return 'Dashboard';
     if (path === '/operator-mode') return 'Operator Cockpit';
     if (path === '/supervisor-mode') return 'Supervisor Observability';
     if (path === '/subsystems') return 'Building Subsystems';
@@ -109,53 +107,59 @@ function AppContent() {
   };
 
   const isDigitalTwin = location.pathname === '/digital-twin';
+  const isCommandCenter = location.pathname === '/' || location.pathname === '/command-center';
+
+  const GuardedRoute = ({ path, element }) => {
+    if (!canAccess(path)) return <Navigate to="/" replace />;
+    return element;
+  };
 
   return (
     <div className="app-layout">
-      {/* Backdrop for Mobile / Tablet Sidebar Drawer */}
-      <div 
+      <div
         className={`sidebar-backdrop ${mobileSidebarOpen ? 'active' : ''}`}
         onClick={() => setMobileSidebarOpen(false)}
       />
 
-      {/* Left Navigation Sidebar */}
       <Sidebar
         collapsed={sidebarCollapsed}
         mobileOpen={mobileSidebarOpen}
         onCloseMobile={() => setMobileSidebarOpen(false)}
         onToggle={handleToggleSidebar}
+        currentUser={currentUser}
       />
 
-      {/* Main SCADA Workspace */}
       <div className="app-main">
         <Header
           currentTime={currentTime}
           moduleName={getModuleName()}
           onToggleSidebar={handleToggleSidebar}
+          currentUser={currentUser}
         />
 
-        {/* Top Notification Bar for Active Alarms */}
-        <TopNotificationBar onSelectEquipment={handleSelectEquipment} />
+        {!isCommandCenter && (
+          <TopNotificationBar onSelectEquipment={handleSelectEquipment} />
+        )}
 
         <div className="app-content-wrapper flex flex-1 overflow-hidden" style={{ position: 'relative' }}>
-          <div className={`app-content flex-1 overflow-y-auto ${isDigitalTwin ? 'full-bleed' : ''}`}>
+          <div className={`app-content flex-1 overflow-y-auto ${isDigitalTwin || isCommandCenter ? 'full-bleed' : ''}`}>
             <Routes>
               <Route path="/" element={<CommandCenter onSelectEquipment={handleSelectEquipment} />} />
               <Route path="/command-center" element={<CommandCenter onSelectEquipment={handleSelectEquipment} />} />
-              <Route path="/operator-mode" element={<OperatorMode onSelectEquipment={handleSelectEquipment} />} />
-              <Route path="/operator" element={<OperatorMode onSelectEquipment={handleSelectEquipment} />} />
-              <Route path="/supervisor-mode" element={<SupervisorMode />} />
-              <Route path="/supervisor" element={<SupervisorMode />} />
+              <Route path="/operator-mode" element={<GuardedRoute path="/operator-mode" element={<OperatorMode onSelectEquipment={handleSelectEquipment} />} />} />
+              <Route path="/operator" element={<GuardedRoute path="/operator-mode" element={<OperatorMode onSelectEquipment={handleSelectEquipment} />} />} />
+              <Route path="/supervisor-mode" element={<GuardedRoute path="/supervisor-mode" element={<SupervisorMode />} />} />
+              <Route path="/supervisor" element={<GuardedRoute path="/supervisor-mode" element={<SupervisorMode />} />} />
               <Route path="/map" element={<Navigate to="/" replace />} />
               <Route path="/subsystems" element={<Subsystems />} />
               <Route path="/subsystems/:id" element={<SubsystemDetail onSelectEquipment={handleSelectEquipment} />} />
               <Route path="/equipment" element={<EquipmentExplorer onSelectEquipment={handleSelectEquipment} />} />
               <Route path="/alerts" element={<AlertsEvents />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/work-orders" element={<WorkOrders />} />
-              <Route path="/assets" element={<AssetManagement onSelectEquipment={handleSelectEquipment} />} />
-              <Route path="/sop" element={<SOPManagement />} />
-              <Route path="/users" element={<UserManagement />} />
+              <Route path="/analytics" element={<GuardedRoute path="/analytics" element={<Analytics />} />} />
+              <Route path="/work-orders" element={<GuardedRoute path="/work-orders" element={<WorkOrders />} />} />
+              <Route path="/assets" element={<GuardedRoute path="/assets" element={<AssetManagement onSelectEquipment={handleSelectEquipment} />} />} />
+              <Route path="/sop" element={<GuardedRoute path="/sop" element={<SOPManagement />} />} />
+              <Route path="/users" element={<GuardedRoute path="/users" element={<UserManagement />} />} />
               <Route path="/digital-twin" element={
                 <Suspense fallback={<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:'#38bdf8',fontFamily:'monospace',fontSize:13,letterSpacing:2}}>Loading 3D Scene...</div>}>
                   <DigitalTwin />
@@ -166,19 +170,17 @@ function AppContent() {
         </div>
       </div>
 
-      {/* Slide-In Equipment Detail Inspection Panel */}
-      <InspectionPanel
-        equipment={selectedEquipment}
-        onClose={handleCloseInspection}
-      />
+      <InspectionPanel equipment={selectedEquipment} onClose={handleCloseInspection} />
     </div>
   );
 }
 
 export default function App() {
   return (
-    <LiveDataProvider>
-      <AppContent />
-    </LiveDataProvider>
+    <AuthProvider>
+      <LiveDataProvider>
+        <AppContent />
+      </LiveDataProvider>
+    </AuthProvider>
   );
 }
