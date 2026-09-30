@@ -137,12 +137,10 @@ function AppContent() {
           currentUser={currentUser}
         />
 
-        {!isCommandCenter && (
-          <TopNotificationBar onSelectEquipment={handleSelectEquipment} />
-        )}
+        <TopNotificationBar onSelectEquipment={handleSelectEquipment} />
 
         <div className="app-content-wrapper flex flex-1 overflow-hidden" style={{ position: 'relative' }}>
-          <div className={`app-content flex-1 overflow-y-auto ${isDigitalTwin || isCommandCenter ? 'full-bleed' : ''}`}>
+          <div className={`app-content flex-1 overflow-y-auto ${isDigitalTwin ? 'full-bleed' : ''}`}>
             <Routes>
               <Route path="/" element={<CommandCenter onSelectEquipment={handleSelectEquipment} />} />
               <Route path="/command-center" element={<CommandCenter onSelectEquipment={handleSelectEquipment} />} />

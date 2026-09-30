@@ -1,25 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Package, Activity, Zap, Server, ShieldCheck, Volume2,
   Flame, Clock, Wind, PlaneLanding, ScanLine, DoorOpen,
-  AlertTriangle, CheckCircle2, ChevronRight, ArrowRight,
-  RefreshCw, Radio, Layers, Maximize2, X, Check, Eye,
-  Cpu, Wrench, Shield
+  AlertTriangle, ChevronRight, ArrowRight,
+  Maximize2, X, Check, Eye,
+  Cpu, Wrench,
+  ExternalLink
 } from 'lucide-react';
 import MultiFloorMapGrid, { FloorSchematic } from '../components/MultiFloorMapGrid';
 import { useNavigate } from 'react-router-dom';
+import { useLiveData } from '../context/LiveDataContext';
 
-// 12 Building Subsystems matching user's exact reference image
+// 12 Building Subsystems conforming to LTIA reference architecture
 const SUBSYSTEMS_REFERENCE = [
   {
     code: 'BHS',
-    name: 'Baggage Handling',
+    name: 'Baggage Handling System',
     icon: Package,
     statusDot: '2',
     dotColor: '#ef4444',
     avail: '97%',
     availNum: 97,
-    alert: 'Alert: Conveyor Belt C3 running at reduced speed',
+    alert: 'Alert: Conveyor jam detected - Motor overload trip; SHTR-BHS-FS01 closed',
     time: '18s ago',
     alertSeverity: 'warn',
     assets: '4/5',
@@ -36,7 +38,7 @@ const SUBSYSTEMS_REFERENCE = [
     dotColor: '#10b981',
     avail: '97%',
     availNum: 97,
-    alert: 'All docking systems operational',
+    alert: 'All 55 docking guidance heads operational',
     time: '18s ago',
     alertSeverity: 'ok',
     assets: '3/5',
@@ -53,7 +55,7 @@ const SUBSYSTEMS_REFERENCE = [
     dotColor: '#10b981',
     avail: '96%',
     availNum: 96,
-    alert: 'All monitoring systems operational',
+    alert: 'All 33 VCB / 100 ACB switchgear nominal',
     time: '18s ago',
     alertSeverity: 'ok',
     assets: '3/4',
@@ -64,13 +66,13 @@ const SUBSYSTEMS_REFERENCE = [
   },
   {
     code: 'SCADA',
-    name: 'Supervisory Control',
+    name: 'Supervisory Control & Data',
     icon: Server,
     statusDot: '1',
     dotColor: '#ef4444',
     avail: '97%',
     availNum: 97,
-    alert: 'Warning: High temperature detected in Zone 02',
+    alert: 'Warning: Winding temp warning in Substation SS-1 Transformer B',
     time: '18s ago',
     alertSeverity: 'warn',
     assets: '1706/1730',
@@ -87,7 +89,7 @@ const SUBSYSTEMS_REFERENCE = [
     dotColor: '#ef4444',
     avail: '90%',
     availNum: 90,
-    alert: 'Alert: Door sensor offline at Gate 7',
+    alert: 'Alert: Tamper switch contact open - Door Forced Open at Portal Alpha',
     time: '18s ago',
     alertSeverity: 'crit',
     assets: '3/5',
@@ -104,7 +106,7 @@ const SUBSYSTEMS_REFERENCE = [
     dotColor: '#10b981',
     avail: '98%',
     availNum: 98,
-    alert: 'All announcement systems operational',
+    alert: 'All terminal concourse acoustic zones synchronized',
     time: '18s ago',
     alertSeverity: 'ok',
     assets: '4/4',
@@ -121,7 +123,7 @@ const SUBSYSTEMS_REFERENCE = [
     dotColor: '#10b981',
     avail: '99%',
     availNum: 99,
-    alert: 'All fire detection systems operational',
+    alert: 'Master BACnet loop healthy • 0 smoke alarms active',
     time: '18s ago',
     alertSeverity: 'ok',
     assets: '4/4',
@@ -138,7 +140,7 @@ const SUBSYSTEMS_REFERENCE = [
     dotColor: '#10b981',
     avail: '99.5%',
     availNum: 99.5,
-    alert: 'Time sync accuracy at 99.8%',
+    alert: 'NTP GPS master time sync accuracy at 99.8%',
     time: '18s ago',
     alertSeverity: 'ok',
     assets: '4/4',
@@ -149,13 +151,13 @@ const SUBSYSTEMS_REFERENCE = [
   },
   {
     code: 'LBMS',
-    name: 'HVAC',
+    name: 'HVAC & Building Mgmt',
     icon: Wind,
     statusDot: '1',
     dotColor: '#f59e0b',
     avail: '94%',
     availNum: 94,
-    alert: 'Warning: HVAC Unit 3 temperature deviation',
+    alert: 'Warning: AHU-GF-001 high return air temperature (28.6°C > 26.0°C)',
     time: '18s ago',
     alertSeverity: 'warn',
     assets: '3/5',
@@ -172,9 +174,9 @@ const SUBSYSTEMS_REFERENCE = [
     dotColor: '#f59e0b',
     avail: '95%',
     availNum: 95,
-    alert: 'Alert: Stand 12 status sensor offline',
+    alert: 'Stand 12 ground power telemetry operational',
     time: '18s ago',
-    alertSeverity: 'warn',
+    alertSeverity: 'ok',
     assets: '3/4',
     on: 3,
     warn: 1,
@@ -183,13 +185,13 @@ const SUBSYSTEMS_REFERENCE = [
   },
   {
     code: 'SSE',
-    name: 'Security Screening',
+    name: 'Security Screening Equipment',
     icon: ScanLine,
     statusDot: '2',
     dotColor: '#ef4444',
     avail: '96%',
     availNum: 96,
-    alert: 'Alert: Scanner #5 requires calibration',
+    alert: 'Alert: Customs Baggage Scanner 2 Dual-View CT calibration required',
     time: '18s ago',
     alertSeverity: 'warn',
     assets: '3/5',
@@ -200,15 +202,15 @@ const SUBSYSTEMS_REFERENCE = [
   },
   {
     code: 'AGAC',
-    name: 'Gate Access Control',
+    name: 'Airport Gate Access Control',
     icon: DoorOpen,
     statusDot: '1',
     dotColor: '#f59e0b',
     avail: '96%',
     availNum: 96,
-    alert: 'Warning: Gate 15 access control delayed response',
+    alert: 'Gate 15 passenger passage telemetry nominal',
     time: '18s ago',
-    alertSeverity: 'warn',
+    alertSeverity: 'ok',
     assets: '3/4',
     on: 3,
     warn: 1,
@@ -217,415 +219,318 @@ const SUBSYSTEMS_REFERENCE = [
   },
 ];
 
-// Recent Alerts from right sidebar
-const RECENT_ALERTS_DATA = [
-  {
-    id: 'ALT-101',
-    system: 'BHS',
-    severity: 'critical',
-    badge: 'Critical',
-    message: 'Conveyor jam detected in sorting unit 3',
-    time: '24m ago',
-    dotColor: '#ef4444',
-  },
-  {
-    id: 'ALT-102',
-    system: 'BHS',
-    severity: 'critical',
-    badge: 'Critical',
-    message: 'Baggage tag scan failure rate >5% threshold',
-    time: '27m ago',
-    dotColor: '#ef4444',
-  },
-  {
-    id: 'ALT-103',
-    system: 'SCADA',
-    severity: 'high',
-    badge: 'High',
-    message: 'Lighting control fault in apron zone 5 (SCADA)',
-    time: '31m ago',
-    dotColor: '#f97316',
-  },
-  {
-    id: 'ALT-104',
-    system: 'LBMS',
-    severity: 'medium',
-    badge: 'Medium',
-    message: 'Temperature deviation in Zone 2 (26.5°C, target 24°C)',
-    time: '37m ago',
-    dotColor: '#eab308',
-  },
-  {
-    id: 'ALT-105',
-    system: 'SCADA',
-    severity: 'medium',
-    badge: 'Medium',
-    message: 'Power consumption spike in HDR-12 (>82% capacity)',
-    time: '44m ago',
-    dotColor: '#eab308',
-  },
-];
-
 export default function CommandCenter({ onSelectEquipment }) {
   const navigate = useNavigate();
-  const [commMode, setCommMode] = useState('AUTO');
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastDataSecs, setLastDataSecs] = useState('01:42');
+  const {
+    alerts,
+    acknowledgeAlert,
+    subsystems: liveSubsystems,
+    scadaMetrics,
+    workOrders,
+    equipmentList,
+    selectedFloor,
+    setSelectedFloor
+  } = useLiveData();
+
   const [maximizedFloor, setMaximizedFloor] = useState(null);
   const [selectedAlert, setSelectedAlert] = useState(null);
+  const [subsystemFilter, setSubsystemFilter] = useState('all'); // 'all' | 'attention' | 'operational'
 
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setIsRefreshing(false);
-      setLastDataSecs('00:01');
-    }, 600);
+  // Dynamic calculations
+  const unackAlerts = alerts.filter(a => !a.acknowledged);
+  const criticalAlerts = unackAlerts.filter(a => a.severity === 'critical');
+  const highAlerts = unackAlerts.filter(a => a.severity === 'high');
+  const activeWOs = workOrders.filter(w => w.status !== 'completed');
+  const inProgressWOs = activeWOs.filter(w => w.status === 'in_progress');
+  const dispatchedWOs = activeWOs.filter(w => w.status === 'assigned' || w.status === 'pending');
+
+  const avgAvail = (
+    liveSubsystems.reduce((acc, s) => acc + (s.health || 97), 0) / (liveSubsystems.length || 1)
+  ).toFixed(1);
+
+  const getSubsystemAlertCount = (code) => {
+    return unackAlerts.filter(a => a.system === code).length;
   };
+
+  // Filtered subsystems list
+  const filteredSubsystems = SUBSYSTEMS_REFERENCE.filter(sys => {
+    const alertCount = getSubsystemAlertCount(sys.code);
+    const hasIssues = alertCount > 0 || sys.availNum < 97;
+    if (subsystemFilter === 'attention') return hasIssues;
+    if (subsystemFilter === 'operational') return !hasIssues;
+    return true;
+  });
 
   return (
     <div className="command-center-root">
       
-      {/* Top Level Operational KPI Cards */}
+      {/* ========================================================
+          1. TOP OPERATIONAL KPI STRIP (Full Width)
+          ======================================================== */}
       <div className="stat-grid stat-grid-4">
-        <div className="stat-card" onClick={() => navigate('/equipment')} style={{ cursor: 'pointer' }} title="View All Assets">
-          <div className="stat-icon blue"><Cpu size={18} /></div>
-          <div className="stat-content">
-            <div className="stat-value">2,684</div>
-            <div className="stat-label">Total Monitored Assets</div>
-            <div className="stat-note">12 Subsystems Connected</div>
-          </div>
-        </div>
-
-        <div className="stat-card" onClick={() => navigate('/alerts')} style={{ cursor: 'pointer' }} title="View Active Alarms">
-          <div className="stat-icon red"><AlertTriangle size={18} /></div>
-          <div className="stat-content">
-            <div className="stat-value">14</div>
-            <div className="stat-label">Active System Alarms</div>
-            <div className="stat-note">2 Critical • 5 High</div>
-          </div>
-        </div>
-
-        <div className="stat-card" onClick={() => navigate('/work-orders')} style={{ cursor: 'pointer' }} title="View Work Orders">
-          <div className="stat-icon yellow"><Wrench size={18} /></div>
-          <div className="stat-content">
-            <div className="stat-value">7</div>
-            <div className="stat-label">Open Work Orders</div>
-            <div className="stat-note">3 In Progress • 4 Dispatched</div>
-          </div>
-        </div>
-
-        <div className="stat-card" onClick={() => navigate('/subsystems')} style={{ cursor: 'pointer' }} title="View Subsystems Directory">
-          <div className="stat-icon green"><Activity size={18} /></div>
-          <div className="stat-content">
-            <div className="stat-value">97.4%</div>
-            <div className="stat-label">Overall Fleet Availability</div>
-            <div className="stat-note">Dual Redundant BACnet/OPC-UA</div>
-          </div>
-        </div>
-      </div>
-
-      {/* 2-Column Responsive SCADA Layout matching user reference image */}
-      <div className="command-center-workspace">
         
-        {/* ========================================================
-            LEFT COLUMN (76% Width): Terminal Floors + Subsystems Grid
-            ======================================================== */}
-        <div className="scada-primary-col">
-          
-          {/* 1. 6-Floor Terminal Schematics Grid (3 columns x 2 rows) */}
-          <div className="scada-floors-container">
-            <MultiFloorMapGrid 
-              activeFloorId="1F"
-              onSelectFloor={(floorId) => {
-                // floor clicked
-              }}
-              onMaximize={(floorId) => setMaximizedFloor(floorId || '4F')}
-            />
+        {/* Monitored Assets */}
+        <div 
+          className="stat-card stat-card-interactive" 
+          onClick={() => navigate('/equipment')} 
+          title="Open Equipment Explorer"
+        >
+          <div className="stat-icon blue">
+            <Cpu size={18} />
           </div>
-
-          {/* 2. Building Subsystems Section (4 columns x 3 rows = 12 cards) */}
-          <div className="scada-subsystems-section">
-            <div className="scada-subsystems-header">
-              <div className="flex items-center gap-2">
-                <span className="scada-subsystems-title">BUILDING SUBSYSTEMS</span>
-              </div>
-              <span className="scada-subsystems-status-tag">11/12 operational</span>
+          <div className="stat-content">
+            <div className="stat-value font-mono">
+              2,684
+              <span className="stat-value-sub">/{scadaMetrics.activeNodes}</span>
             </div>
-
-            <div className="scada-subsystems-cards-grid">
-              {SUBSYSTEMS_REFERENCE.map(sys => {
-                const Icon = sys.icon;
-                const onPercent = (sys.on / sys.total) * 100;
-                const warnPercent = (sys.warn / sys.total) * 100;
-                const offPercent = (sys.off / sys.total) * 100;
-
-                return (
-                  <div 
-                    key={sys.code}
-                    className="scada-subsystem-card"
-                    onClick={() => navigate(`/subsystems/${sys.code}`)}
-                    title={`View ${sys.code} - ${sys.name} telemetry`}
-                  >
-                    {/* Top Row: Icon + Code + Name + Status Dot */}
-                    <div className="subsys-card-header">
-                      <div className="subsys-id-group">
-                        <div className="subsys-icon-box">
-                          <Icon size={14} />
-                        </div>
-                        <div className="subsys-naming">
-                          <span className="subsys-code">{sys.code}</span>
-                          <span className="subsys-full-name">{sys.name}</span>
-                        </div>
-                      </div>
-
-                      {/* Dot with count */}
-                      <div className="subsys-badge-group">
-                        <span 
-                          className="subsys-indicator-dot" 
-                          style={{ backgroundColor: sys.dotColor }}
-                        />
-                        {sys.statusDot && (
-                          <span className="subsys-indicator-count">{sys.statusDot}</span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Row 2: Avail. + Percentage + Thin Progress Bar */}
-                    <div className="subsys-avail-section">
-                      <div className="subsys-avail-info">
-                        <span className="subsys-label">Avail.</span>
-                        <span className="subsys-avail-val">{sys.avail}</span>
-                      </div>
-                      <div className="subsys-avail-track">
-                        <div 
-                          className="subsys-avail-fill" 
-                          style={{ 
-                            width: sys.avail,
-                            backgroundColor: sys.availNum >= 97 ? '#10b981' : sys.availNum >= 94 ? '#22c55e' : '#f59e0b'
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Row 3: Alert / Operational message + Timestamp */}
-                    <div className="subsys-alert-section">
-                      <span className={`subsys-alert-msg ${sys.alertSeverity}`}>
-                        {sys.alert}
-                      </span>
-                      <span className="subsys-alert-time">{sys.time}</span>
-                    </div>
-
-                    {/* Row 4: Assets + Multi-Segment Track + 3 Color Counts */}
-                    <div className="subsys-assets-section">
-                      <div className="subsys-assets-info">
-                        <span className="subsys-label">Assets</span>
-                        <span className="subsys-assets-val">{sys.assets}</span>
-                      </div>
-
-                      {/* 3-Color Segmented Track */}
-                      <div className="subsys-assets-track">
-                        <div className="subsys-seg seg-on" style={{ width: `${onPercent}%` }} />
-                        <div className="subsys-seg seg-warn" style={{ width: `${warnPercent}%` }} />
-                        <div className="subsys-seg seg-off" style={{ width: `${offPercent}%` }} />
-                      </div>
-
-                      {/* Color Coded Counters Below Bar */}
-                      <div className="subsys-assets-counts">
-                        <span className="count-on">{sys.on} on</span>
-                        <span className="count-warn">{sys.warn} warn</span>
-                        <span className="count-off">{sys.off} off</span>
-                      </div>
-                    </div>
-
-                  </div>
-                );
-              })}
+            <div className="stat-label">Total Monitored Assets</div>
+            <div className="stat-note flex items-center justify-between">
+              <span>12 Subsystems Connected</span>
+              <span className="text-emerald-400 font-mono font-bold">98.1% Online</span>
             </div>
           </div>
-
+          <div className="stat-card-glow blue" />
         </div>
 
-        {/* ========================================================
-            RIGHT COLUMN (24% Width): SCADA Ops & Real-Time Alerts
-            ======================================================== */}
-        <div className="scada-secondary-col">
-          
-          {/* 1. Last Data Received Header */}
-          <div className="scada-ops-header">
-            <div className="flex items-center gap-1.5 text-secondary">
-              <RefreshCw 
-                size={13} 
-                className={`cursor-pointer hover:text-cyan-400 transition-transform ${isRefreshing ? 'animate-spin text-cyan-400' : ''}`}
-                onClick={handleRefresh}
-                title="Force Telemetry Sync"
-              />
-              <span className="scada-ops-header-label">Last Data Received</span>
-            </div>
-            <span className="scada-ops-timestamp font-mono">{lastDataSecs}</span>
+        {/* Active Alarms */}
+        <div 
+          className={`stat-card stat-card-interactive ${criticalAlerts.length > 0 ? 'stat-card-alert' : ''}`}
+          onClick={() => navigate('/alerts')} 
+          title="Open Central Alarms Directory"
+        >
+          <div className="stat-icon red">
+            <AlertTriangle size={18} />
           </div>
-
-          {/* 2. Recent Alerts Panel */}
-          <div className="scada-panel-card recent-alerts-panel">
-            <div className="scada-panel-header">
-              <div className="flex items-center gap-2">
-                <span className="scada-panel-dot-red" />
-                <span className="scada-panel-title">Recent Alerts</span>
-                <span className="scada-panel-badge-count">14</span>
-              </div>
-              <button 
-                onClick={() => navigate('/alerts')}
-                className="scada-panel-link"
-                title="View All Alerts"
-              >
-                <span>All</span>
-                <ChevronRight size={12} />
-              </button>
+          <div className="stat-content">
+            <div className="stat-value font-mono text-red-400 flex items-center gap-2">
+              {unackAlerts.length}
+              {criticalAlerts.length > 0 && (
+                <span className="alarm-pulse-tag">
+                  {criticalAlerts.length} CRIT
+                </span>
+              )}
             </div>
-
-            <div className="recent-alerts-list">
-              {RECENT_ALERTS_DATA.map(alert => (
-                <div 
-                  key={alert.id}
-                  className={`scada-alert-item ${alert.severity}`}
-                  onClick={() => setSelectedAlert(alert)}
-                >
-                  <div className="scada-alert-top">
-                    <div className="flex items-center gap-1.5">
-                      <span className="scada-alert-dot" style={{ backgroundColor: alert.dotColor }} />
-                      <span className="scada-alert-sys font-mono">{alert.system}</span>
-                      <span className={`scada-alert-pill ${alert.severity}`}>{alert.badge}</span>
-                    </div>
-                    <span className="scada-alert-time">{alert.time}</span>
-                  </div>
-                  <div className="scada-alert-body">
-                    {alert.message}
-                  </div>
-                </div>
-              ))}
+            <div className="stat-label">Active System Alarms</div>
+            <div className="stat-note flex items-center justify-between">
+              <span>{criticalAlerts.length} Critical • {highAlerts.length} High</span>
+              <span className="text-red-400 font-mono">Action Required</span>
             </div>
           </div>
+          <div className="stat-card-glow red" />
+        </div>
 
-          {/* 3. Comm. Channel Architecture Diagram */}
-          <div className="scada-panel-card comm-channel-panel">
-            <div className="scada-panel-header">
-              <div className="flex items-center gap-2">
-                <Radio size={13} className="text-amber-400" />
-                <span className="scada-panel-title">Comm. Channel</span>
-              </div>
-              
-              {/* Channel Mode Toggle Buttons */}
-              <div className="comm-channel-toggles">
-                {['AUTO', 'LMS', 'LINK', 'HBMS', 'CLEAR'].map(mode => (
-                  <button
-                    key={mode}
-                    className={`comm-toggle-btn ${commMode === mode ? 'active' : ''}`}
-                    onClick={() => setCommMode(mode)}
-                  >
-                    {mode}
-                  </button>
-                ))}
-              </div>
+        {/* Open Work Orders */}
+        <div 
+          className="stat-card stat-card-interactive" 
+          onClick={() => navigate('/work-orders')} 
+          title="View Maintenance Work Orders"
+        >
+          <div className="stat-icon yellow">
+            <Wrench size={18} />
+          </div>
+          <div className="stat-content">
+            <div className="stat-value font-mono text-amber-400">
+              {activeWOs.length}
             </div>
-
-            {/* Visual Node Link Diagram */}
-            <div className="comm-node-diagram">
-              
-              {/* Left Node: ALL SUBSYSTEM */}
-              <div className="comm-node-box node-subsystem">
-                <div className="comm-node-icon">
-                  <Layers size={14} className="text-amber-400" />
-                </div>
-                <div className="comm-node-num">33</div>
-                <div className="comm-node-label">ALL SUBSYSTEM</div>
-                <div className="comm-node-sub">12 Systems</div>
-                <div className="comm-node-status operational">OPERABLE</div>
-              </div>
-
-              {/* Animated Connection Bridge */}
-              <div className="comm-link-bridge">
-                <div className="comm-link-line">
-                  <div className="comm-link-pulse" />
-                </div>
-                <div className="comm-link-tag">Connected</div>
-                <div className="comm-link-line">
-                  <div className="comm-link-pulse reverse" />
-                </div>
-              </div>
-
-              {/* Right Node: HBMS Central Platform */}
-              <div className="comm-node-box node-hbms">
-                <div className="comm-node-icon">
-                  <Server size={14} className="text-emerald-400" />
-                </div>
-                <div className="comm-node-num">8</div>
-                <div className="comm-node-label">HBMS</div>
-                <div className="comm-node-sub">Central Platform</div>
-              </div>
-
-            </div>
-
-            {/* Diagnostic Alert Warning */}
-            <div className="comm-channel-warning">
-              <AlertTriangle size={12} className="text-amber-400 shrink-0 mt-0.5" />
-              <span>BHS subsystem is reporting the issue — the link and HBMS are functional.</span>
-            </div>
-
-            <div className="comm-channel-footer">
-              <span>Last data refreshed 3s ago</span>
+            <div className="stat-label">Open Work Orders</div>
+            <div className="stat-note flex items-center justify-between">
+              <span>{inProgressWOs.length} In Progress • {dispatchedWOs.length} Dispatched</span>
+              <span className="text-amber-400 font-mono">SLA Active</span>
             </div>
           </div>
+          <div className="stat-card-glow yellow" />
+        </div>
 
-          {/* 4. Bottom 2x2 SCADA Metric Cards */}
-          <div className="scada-kpi-grid">
-            
-            {/* SYS HEALTH */}
-            <div className="scada-kpi-box">
-              <span className="kpi-box-title">SYS HEALTH</span>
-              <div className="kpi-box-val text-emerald-400">96.9%</div>
-              <div className="kpi-box-subs">
-                <span className="text-emerald-400">11 OK</span>
-                <span className="text-zinc-500">0 down</span>
-              </div>
-            </div>
-
-            {/* ALERTS */}
-            <div className="scada-kpi-box">
-              <span className="kpi-box-title">ALERTS</span>
-              <div className="kpi-box-val text-red-400">14</div>
-              <div className="kpi-box-subs">
-                <span className="text-red-400">2 crit</span>
-                <span className="text-amber-400">2 med</span>
-              </div>
-            </div>
-
-            {/* WORK ORDERS */}
-            <div className="scada-kpi-box">
-              <span className="kpi-box-title">WORK ORDERS</span>
-              <div className="kpi-box-val text-amber-400">5</div>
-              <div className="kpi-box-subs">
-                <span className="text-amber-400">2 open</span>
-                <span className="text-emerald-400">1 done</span>
-              </div>
-            </div>
-
-            {/* ONLINE */}
-            <div className="scada-kpi-box">
-              <span className="kpi-box-title">ONLINE</span>
-              <div className="kpi-box-val text-sky-400">11/12</div>
-              <div className="kpi-box-subs">
-                <span className="text-sky-400">11 active</span>
-                <span className="text-zinc-500">1 off</span>
-              </div>
-            </div>
-
+        {/* Overall Fleet Availability */}
+        <div 
+          className="stat-card stat-card-interactive" 
+          onClick={() => navigate('/subsystems')} 
+          title="View Subsystems Directory"
+        >
+          <div className="stat-icon green">
+            <Activity size={18} />
           </div>
-
+          <div className="stat-content">
+            <div className="stat-value font-mono text-emerald-400">
+              {avgAvail}%
+            </div>
+            <div className="stat-label">Overall Fleet Availability</div>
+            <div className="stat-note flex items-center justify-between">
+              <span>Dual Redundant BACnet/OPC-UA</span>
+              <span className="text-emerald-400 font-mono">Target ≥95%</span>
+            </div>
+          </div>
+          <div className="stat-card-glow green" />
         </div>
 
       </div>
 
       {/* ========================================================
-          MODAL: Maximize Floor Terminal View with Real Requirements Telemetry
+          2. EXPANSIVE FULL-WIDTH SPATIAL FLOOR MAP (Center Stage)
+          ======================================================== */}
+      <div className="card" style={{ padding: 0, overflow: 'hidden', width: '100%', border: '1px solid var(--border)' }}>
+        
+
+
+        {/* All 6 Floors Grid by Default */}
+        <div style={{ background: '#05070c', width: '100%', padding: '16px' }}>
+          <MultiFloorMapGrid
+            activeFloorId={selectedFloor || '1F'}
+            onSelectFloor={(floorId) => {
+              if (setSelectedFloor) setSelectedFloor(floorId);
+              setMaximizedFloor(floorId);
+            }}
+            onMaximize={(floorId) => setMaximizedFloor(floorId || '4F')}
+          />
+        </div>
+      </div>
+
+      {/* ========================================================
+          3. FULL-WIDTH 12 BUILDING SUBSYSTEMS DIRECTORY
+          ======================================================== */}
+      <div className="card" style={{ padding: 'var(--s4)', width: '100%' }}>
+        
+        {/* Header */}
+        <div className="scada-subsystems-header">
+          <div className="flex items-center gap-3">
+            <span className="scada-subsystems-title">BUILDING SUBSYSTEMS DIRECTORY</span>
+            <span className="badge badge-operational text-3xs font-mono">
+              {liveSubsystems.filter(s => s.status === 'operational').length}/12 OPERATIONAL
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Filter Tabs */}
+            <div className="subsys-filter-tabs">
+              {[
+                { id: 'all', label: `All (12)` },
+                { id: 'attention', label: `Attention (${criticalAlerts.length + highAlerts.length})` },
+                { id: 'operational', label: `Nominal (9)` }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSubsystemFilter(tab.id)}
+                  className={`subsys-filter-btn ${subsystemFilter === tab.id ? 'active' : ''}`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => navigate('/subsystems')}
+              className="btn btn-secondary btn-sm font-mono text-xs flex items-center gap-1.5"
+              style={{ height: '28px', padding: '0 10px' }}
+            >
+              <span>Subsystems Directory</span>
+              <ArrowRight size={12} />
+            </button>
+          </div>
+        </div>
+
+        {/* 12 Subsystems Cards Grid (4 Columns x 3 Rows, Spacious Full Width) */}
+        <div className="scada-subsystems-cards-grid">
+          {filteredSubsystems.map(sys => {
+            const Icon = sys.icon;
+            const alertCount = getSubsystemAlertCount(sys.code);
+            const hasCritical = alerts.some(a => a.system === sys.code && a.severity === 'critical' && !a.acknowledged);
+            const hasWarning = alertCount > 0 && !hasCritical;
+
+            const onPercent = (sys.on / sys.total) * 100;
+            const warnPercent = (sys.warn / sys.total) * 100;
+            const offPercent = (sys.off / sys.total) * 100;
+
+            return (
+              <div 
+                key={sys.code}
+                className={`scada-subsystem-card ${hasCritical ? 'has-critical-alarm' : hasWarning ? 'has-warning-alarm' : ''}`}
+                onClick={() => navigate(`/subsystems/${sys.code}`)}
+                title={`View ${sys.code} - ${sys.name} SCADA telemetry`}
+              >
+                {/* Top Row: Icon + Code + Name + Status Dot */}
+                <div className="subsys-card-header">
+                  <div className="subsys-id-group">
+                    <div className={`subsys-icon-box ${hasCritical ? 'crit' : hasWarning ? 'warn' : ''}`}>
+                      <Icon size={14} />
+                    </div>
+                    <div className="subsys-naming">
+                      <span className="subsys-code">{sys.code}</span>
+                      <span className="subsys-full-name">{sys.name}</span>
+                    </div>
+                  </div>
+
+                  {/* Dot with count */}
+                  <div className="subsys-badge-group">
+                    <span 
+                      className="subsys-indicator-dot" 
+                      style={{ backgroundColor: hasCritical ? '#ef4444' : hasWarning ? '#f59e0b' : '#10b981' }}
+                    />
+                    {(alertCount > 0 || sys.statusDot) && (
+                      <span className={`subsys-indicator-count ${hasCritical ? 'text-red-400' : ''}`}>
+                        {alertCount > 0 ? alertCount : sys.statusDot}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Row 2: Avail. + Percentage + Thin Progress Bar */}
+                <div className="subsys-avail-section">
+                  <div className="subsys-avail-info">
+                    <span className="subsys-label">Availability</span>
+                    <span className="subsys-avail-val font-mono">{sys.avail}</span>
+                  </div>
+                  <div className="subsys-avail-track">
+                    <div 
+                      className="subsys-avail-fill" 
+                      style={{ 
+                        width: sys.avail,
+                        backgroundColor: sys.availNum >= 97 ? '#10b981' : sys.availNum >= 94 ? '#22c55e' : '#f59e0b'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Row 3: Alert / Operational message */}
+                <div className="subsys-alert-section">
+                  <span className={`subsys-alert-msg ${hasCritical ? 'crit' : hasWarning ? 'warn' : 'ok'}`} title={sys.alert}>
+                    {hasCritical 
+                      ? `Alert: ${alerts.find(a => a.system === sys.code && a.severity === 'critical')?.message || sys.alert}`
+                      : sys.alert
+                    }
+                  </span>
+                  <span className="subsys-alert-time">{sys.time}</span>
+                </div>
+
+                {/* Row 4: Assets + Multi-Segment Track + 3 Color Counts */}
+                <div className="subsys-assets-section">
+                  <div className="subsys-assets-info">
+                    <span className="subsys-label">Assets Monitored</span>
+                    <span className="subsys-assets-val font-mono">{sys.assets}</span>
+                  </div>
+
+                  {/* 3-Color Segmented Track */}
+                  <div className="subsys-assets-track">
+                    <div className="subsys-seg seg-on" style={{ width: `${onPercent}%` }} />
+                    <div className="subsys-seg seg-warn" style={{ width: `${warnPercent}%` }} />
+                    <div className="subsys-seg seg-off" style={{ width: `${offPercent}%` }} />
+                  </div>
+
+                  {/* Color Coded Counters Below Bar */}
+                  <div className="subsys-assets-counts font-mono">
+                    <span className="count-on">{sys.on} on</span>
+                    <span className="count-warn">{sys.warn} warn</span>
+                    <span className="count-off">{sys.off} off</span>
+                  </div>
+                </div>
+
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ========================================================
+          MODAL: Maximize Floor Terminal View with Real Telemetry
           ======================================================== */}
       {maximizedFloor && (() => {
         const floorData = {
@@ -745,6 +650,7 @@ export default function CommandCenter({ onSelectEquipment }) {
                     hasAlert={maximizedFloor === '1F'} 
                     alertZone="23"
                     onZoneClick={(zid) => console.log('Inspect zone', zid)}
+                    compact={false}
                   />
                 </div>
 
@@ -811,7 +717,7 @@ export default function CommandCenter({ onSelectEquipment }) {
       })()}
 
       {/* ========================================================
-          MODAL: Alert Quick Inspector
+          MODAL: Alert Quick Inspector with Real Telemetry & Actions
           ======================================================== */}
       {selectedAlert && (
         <div className="scada-modal-overlay animate-fadeIn" onClick={() => setSelectedAlert(null)}>
@@ -831,7 +737,7 @@ export default function CommandCenter({ onSelectEquipment }) {
             <div className="p-5 space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
                 <span className={`scada-alert-pill ${selectedAlert.severity}`}>
-                  {selectedAlert.badge.toUpperCase()} SEVERITY
+                  {(selectedAlert.badge || selectedAlert.severity).toUpperCase()} SEVERITY
                 </span>
                 <span className="font-mono text-xs text-zinc-400">{selectedAlert.time}</span>
               </div>
@@ -850,8 +756,18 @@ export default function CommandCenter({ onSelectEquipment }) {
                 </div>
                 <div className="p-3 bg-zinc-900/60 rounded border border-zinc-800/80">
                   <span className="text-zinc-500 block text-3xs mb-1">IMPACT ZONE</span>
-                  <span className="text-amber-400 font-bold">Terminal West Pier / Concourse</span>
+                  <span className="text-amber-400 font-bold">{selectedAlert.location || 'Terminal Concourse Pier'}</span>
                 </div>
+              </div>
+
+              {/* Recommended SOP Step */}
+              <div className="p-3 bg-zinc-950/80 rounded border border-zinc-800 text-xs font-mono">
+                <span className="text-zinc-400 block text-3xs uppercase font-bold mb-1 text-cyan-400">
+                  RECOMMENDED SOP ESCALATION (SOP-01/04)
+                </span>
+                <p className="text-zinc-300 m-0 text-3xs leading-relaxed">
+                  Acknowledge BACnet/OPC-UA alarm event. Command automated CCTV preset pan to zone coordinates. Verify secondary redundant feed before field dispatch.
+                </p>
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t border-zinc-800">
@@ -859,26 +775,63 @@ export default function CommandCenter({ onSelectEquipment }) {
                   className="btn btn-ghost btn-sm text-xs font-mono"
                   onClick={() => setSelectedAlert(null)}
                 >
-                  Dismiss
+                  Close
                 </button>
-                <button 
-                  className="btn btn-secondary btn-sm text-xs font-mono flex items-center gap-1"
+                
+                {/* Inspect Equipment Action */}
+                <button
+                  className="btn btn-secondary btn-sm text-xs font-mono flex items-center gap-1.5"
                   onClick={() => {
-                    navigate(`/subsystems/${selectedAlert.system}`);
+                    const eq = equipmentList?.find(
+                      item => item.id === selectedAlert.equipment || item.name === selectedAlert.equipment
+                    );
+                    setSelectedAlert(null);
+                    if (eq && onSelectEquipment) {
+                      onSelectEquipment(eq);
+                    } else if (onSelectEquipment) {
+                      onSelectEquipment({
+                        id: selectedAlert.equipment || 'EQ-NODE',
+                        name: `${selectedAlert.system} - ${selectedAlert.subsystem || 'Asset'}`,
+                        system: selectedAlert.system,
+                        floor: selectedAlert.location?.split(',')?.pop()?.trim() || 'GF',
+                        location: selectedAlert.location,
+                        status: selectedAlert.severity === 'critical' ? 'critical' : 'warning',
+                        temp: 28.4,
+                        health: 48,
+                        mode: 'manual'
+                      });
+                    }
                   }}
                 >
                   <Eye size={12} />
-                  <span>Open Subsystem View</span>
+                  <span>Inspect Asset Telemetry</span>
                 </button>
+
+                {/* Subsystem Navigation */}
                 <button 
-                  className="btn btn-primary btn-sm text-xs font-mono flex items-center gap-1"
+                  className="btn btn-secondary btn-sm text-xs font-mono flex items-center gap-1"
                   onClick={() => {
                     setSelectedAlert(null);
+                    navigate(`/subsystems/${selectedAlert.system}`);
                   }}
                 >
-                  <Check size={12} />
-                  <span>Acknowledge Alarm</span>
+                  <ExternalLink size={12} />
+                  <span>Subsystem View</span>
                 </button>
+
+                {/* Live Acknowledge */}
+                {!selectedAlert.acknowledged && (
+                  <button 
+                    className="btn btn-primary btn-sm text-xs font-mono flex items-center gap-1"
+                    onClick={() => {
+                      acknowledgeAlert(selectedAlert.id);
+                      setSelectedAlert(null);
+                    }}
+                  >
+                    <Check size={12} />
+                    <span>Acknowledge Alarm</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>

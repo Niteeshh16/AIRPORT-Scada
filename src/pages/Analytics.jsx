@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   TrendingUp, TrendingDown, Minus, Download, Zap,
-  Activity, Thermometer, CheckCircle2, Layers
+  Activity, Thermometer, CheckCircle2
 } from 'lucide-react';
 import { useLiveData } from '../context/LiveDataContext';
 import { TREND_DATA } from '../data/mockData';
@@ -36,19 +36,6 @@ export default function Analytics() {
     { label: 'Harmonic THD', value: '2.8%', icon: CheckCircle2, color: 'green', note: '4 AHFs Active (<5% Limit)' },
   ];
 
-  const dbkuKpis = [
-    { code: 'CCTV-01', name: 'Camera Fleet Availability', formula: '(Online Cameras / Total Cameras) × 100', target: '≥ 98.0%', actual: '98.6%', freq: '5 mins', sub: 'CCTV' },
-    { code: 'CCTV-02', name: 'RTSP Video Stream Latency', formula: 'T_display - T_capture', target: '≤ 1.50 sec', actual: '1.18 sec', freq: 'Realtime', sub: 'CCTV' },
-    { code: 'CCTV-03', name: '30-Day Storage Retention Compliance', formula: '(Cameras with ≥30d Footage / Total) × 100', target: '100%', actual: '100%', freq: 'Daily', sub: 'CCTV' },
-    { code: 'CCTV-04', name: 'Camera Mean Time to Repair (MTTR)', formula: 'Σ(T_restore - T_fault) / Total Faults', target: '≤ 4.0 hrs', actual: '2.8 hrs', freq: 'Monthly', sub: 'CCTV' },
-    { code: 'TAX-01', name: 'Annual Assessment Collection Rate', formula: '(Revenue Collected / Total Demand) × 100', target: '≥ 90.0%', actual: '92.4%', freq: 'Weekly', sub: 'Assessment Tax' },
-    { code: 'TAX-02', name: 'Cumulative Arrears Recovery', formula: '(Arrears Recovered / Total Arrears) × 100', target: '≥ 35.0%', actual: '38.2%', freq: 'Monthly', sub: 'Assessment Tax' },
-    { code: 'TAX-03', name: 'e-Payment Digital Channel Adoption', formula: '(Online Payments / Total Payments) × 100', target: '≥ 65.0%', actual: '71.5%', freq: 'Monthly', sub: 'Assessment Tax' },
-    { code: 'FB-01', name: 'Public Complaint SLA Compliance', formula: '(Tickets within SLA / Total Tickets) × 100', target: '≥ 85.0%', actual: '88.4%', freq: 'Weekly', sub: 'Feedback' },
-    { code: 'FB-02', name: 'Average Resolution Time (ART)', formula: 'Σ(T_resolve - T_log) / Resolved Tickets', target: '≤ 72.0 hrs', actual: '44.8 hrs', freq: 'Weekly', sub: 'Feedback' },
-    { code: 'FB-03', name: 'First Contact Resolution (FCR)', formula: '(Resolved at First Contact / Total) × 100', target: '≥ 40.0%', actual: '46.2%', freq: 'Monthly', sub: 'Feedback' },
-    { code: 'FB-04', name: 'Citizen Satisfaction Index (CSAT)', formula: 'Σ(Survey Scores) / (Responses × 5) × 100', target: '≥ 80.0%', actual: '84.5%', freq: 'Monthly', sub: 'Feedback' },
-  ];
 
   const renderTrendsChart = () => {
     const commonProps = {
@@ -146,7 +133,6 @@ export default function Analytics() {
           { id: 'trends', label: 'Fleet Availability & SEC Trends', icon: Activity },
           { id: 'lbms_kpis', label: 'LBMS 27 KPI Suite (Official Spec)', icon: Thermometer },
           { id: 'electrical_scada', label: 'Electrical SCADA Distribution (1,613 Assets)', icon: Zap },
-          { id: 'dbku_kpis', label: 'DBKU Smart City CIOC KPIs', icon: Layers },
         ].map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -326,51 +312,7 @@ export default function Analytics() {
         </div>
       )}
 
-      {/* TAB 4: DBKU SMART CITY CIOC KPIS */}
-      {activeTab === 'dbku_kpis' && (
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: 'var(--s4) var(--s5)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)' }}>
-                DBKU Smart City Subsystems KPI Catalog
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--text-3)' }}>
-                CCTV Surveillance, Assessment Tax, and Citizen Feedback Engine (DBKU 3 subsystem kpi.csv)
-              </div>
-            </div>
-            <span className="badge badge-operational">CIOC Conforming</span>
-          </div>
 
-          <div style={{ overflowX: 'auto' }}>
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Code</th>
-                  <th>Subsystem</th>
-                  <th>Metric Name</th>
-                  <th>Formula</th>
-                  <th>Target SLA</th>
-                  <th>Live Value</th>
-                  <th>Frequency</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dbkuKpis.map((kpi, idx) => (
-                  <tr key={idx}>
-                    <td style={{ fontFamily: 'var(--mono)', fontWeight: 700, color: 'var(--accent)' }}>{kpi.code}</td>
-                    <td style={{ fontWeight: 600, color: 'var(--text-2)' }}>{kpi.sub}</td>
-                    <td style={{ fontWeight: 500, color: 'var(--text-1)' }}>{kpi.name}</td>
-                    <td style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--text-3)' }}>{kpi.formula}</td>
-                    <td style={{ fontFamily: 'var(--mono)', color: 'var(--yellow)' }}>{kpi.target}</td>
-                    <td style={{ fontFamily: 'var(--mono)', fontWeight: 700, color: 'var(--green)' }}>{kpi.actual}</td>
-                    <td style={{ fontSize: 11, color: 'var(--text-3)', fontFamily: 'var(--mono)' }}>{kpi.freq}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

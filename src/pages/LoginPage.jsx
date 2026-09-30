@@ -55,7 +55,11 @@ export default function LoginPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'radial-gradient(ellipse at 20% 50%, rgba(0, 212, 170, 0.06) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(56, 189, 248, 0.06) 0%, transparent 50%), #080d14',
+      backgroundImage: "radial-gradient(circle at 50% 45%, rgba(6, 12, 22, 0.62) 0%, rgba(3, 7, 14, 0.88) 100%), url('/airport_login_bg.jpg')",
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -66,9 +70,9 @@ export default function LoginPage() {
       overflow: 'hidden',
     }}>
 
-      {/* Background Grid */}
+      {/* Background Grid Accent */}
       <div style={{
-        position: 'absolute', inset: 0, opacity: 0.03,
+        position: 'absolute', inset: 0, opacity: 0.04,
         backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
         backgroundSize: '40px 40px', pointerEvents: 'none',
       }} />
@@ -78,10 +82,11 @@ export default function LoginPage() {
         <div key={pos} style={{
           position: 'absolute',
           width: 120, height: 120,
-          ...(pos === 'topLeft' ? { top: 0, left: 0, borderTop: '2px solid rgba(0,212,170,0.2)', borderLeft: '2px solid rgba(0,212,170,0.2)' } : {}),
-          ...(pos === 'topRight' ? { top: 0, right: 0, borderTop: '2px solid rgba(56,189,248,0.2)', borderRight: '2px solid rgba(56,189,248,0.2)' } : {}),
-          ...(pos === 'bottomLeft' ? { bottom: 0, left: 0, borderBottom: '2px solid rgba(56,189,248,0.2)', borderLeft: '2px solid rgba(56,189,248,0.2)' } : {}),
-          ...(pos === 'bottomRight' ? { bottom: 0, right: 0, borderBottom: '2px solid rgba(0,212,170,0.2)', borderRight: '2px solid rgba(0,212,170,0.2)' } : {}),
+          pointerEvents: 'none',
+          ...(pos === 'topLeft' ? { top: 12, left: 12, borderTop: '2px solid rgba(0,212,170,0.3)', borderLeft: '2px solid rgba(0,212,170,0.3)' } : {}),
+          ...(pos === 'topRight' ? { top: 12, right: 12, borderTop: '2px solid rgba(56,189,248,0.3)', borderRight: '2px solid rgba(56,189,248,0.3)' } : {}),
+          ...(pos === 'bottomLeft' ? { bottom: 12, left: 12, borderBottom: '2px solid rgba(56,189,248,0.3)', borderLeft: '2px solid rgba(56,189,248,0.3)' } : {}),
+          ...(pos === 'bottomRight' ? { bottom: 12, right: 12, borderBottom: '2px solid rgba(0,212,170,0.3)', borderRight: '2px solid rgba(0,212,170,0.3)' } : {}),
         }} />
       ))}
 
@@ -89,9 +94,12 @@ export default function LoginPage() {
       <div style={{
         position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)',
         display: 'flex', alignItems: 'center', gap: 20,
-        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+        background: 'rgba(7, 12, 22, 0.82)', border: '1px solid rgba(255,255,255,0.12)',
         borderRadius: 8, padding: '6px 16px', fontSize: 11,
-        color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', letterSpacing: '0.05em',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+        color: 'rgba(255,255,255,0.6)', fontFamily: 'monospace', letterSpacing: '0.05em',
         whiteSpace: 'nowrap',
       }}>
         {[
@@ -114,19 +122,20 @@ export default function LoginPage() {
         width: '100%', maxWidth: 960,
         display: 'grid', gridTemplateColumns: '1fr 1fr',
         gap: 0,
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        background: 'rgba(8, 14, 25, 0.82)',
+        border: '1px solid rgba(255,255,255,0.12)',
         borderRadius: 20,
-        backdropFilter: 'blur(20px)',
+        backdropFilter: 'blur(28px)',
+        WebkitBackdropFilter: 'blur(28px)',
         overflow: 'hidden',
-        boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)',
+        boxShadow: '0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)',
       }}>
 
         {/* Left — Branding Panel */}
         <div style={{
           padding: '48px 40px',
-          background: 'linear-gradient(160deg, rgba(0,212,170,0.08) 0%, rgba(56,189,248,0.05) 50%, rgba(0,0,0,0.2) 100%)',
-          borderRight: '1px solid rgba(255,255,255,0.06)',
+          background: 'linear-gradient(160deg, rgba(0,212,170,0.14) 0%, rgba(56,189,248,0.08) 50%, rgba(5,10,18,0.6) 100%)',
+          borderRight: '1px solid rgba(255,255,255,0.08)',
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
         }}>
           <div>
@@ -177,9 +186,15 @@ export default function LoginPage() {
         </div>
 
         {/* Right — Login Form */}
-        <div style={{ padding: '48px 40px', display: 'flex', flexDirection: 'column', gap: 28 }}>
+        <div style={{
+          padding: '48px 40px',
+          background: 'rgba(7, 12, 22, 0.65)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 28,
+        }}>
           <div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', fontFamily: 'monospace', marginBottom: 8 }}>
+            <div style={{ fontSize: 10, color: 'rgba(0,212,170,0.8)', letterSpacing: '0.14em', fontFamily: 'monospace', marginBottom: 8, fontWeight: 700 }}>
               AUTHENTICATED ACCESS
             </div>
             <h2 style={{ fontSize: 20, fontWeight: 700, color: 'white', margin: 0 }}>Select Your Role</h2>
@@ -198,8 +213,8 @@ export default function LoginPage() {
                   style={{
                     display: 'flex', alignItems: 'center', gap: 14,
                     padding: '14px 16px',
-                    background: isSelected ? `rgba(${cfg.glowColor.slice(5, -1)}, 0.15)` : 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${isSelected ? cfg.borderColor : 'rgba(255,255,255,0.07)'}`,
+                    background: isSelected ? `rgba(${cfg.glowColor.slice(5, -1)}, 0.18)` : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${isSelected ? cfg.borderColor : 'rgba(255,255,255,0.09)'}`,
                     borderRadius: 12,
                     cursor: 'pointer',
                     textAlign: 'left',
@@ -224,7 +239,7 @@ export default function LoginPage() {
                         fontWeight: 700, letterSpacing: '0.05em',
                       }}>{cfg.badge}</span>
                     </div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 1 }}>{user.role} · {user.department.split('—')[0].trim()}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 1 }}>{user.role} · {user.department.split('—')[0].trim()}</div>
                   </div>
                   {isSelected && <ChevronRight size={16} color={cfg.borderColor.slice(0, -4) + '1)'} />}
                 </button>
@@ -237,12 +252,12 @@ export default function LoginPage() {
             <div style={{ position: 'relative' }}>
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 10,
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.1)',
+                background: 'rgba(12, 18, 30, 0.7)',
+                border: '1px solid rgba(255,255,255,0.14)',
                 borderRadius: 10, padding: '0 14px',
                 transition: 'border-color 0.2s',
               }}>
-                <Lock size={14} color="rgba(255,255,255,0.3)" style={{ flexShrink: 0 }} />
+                <Lock size={14} color="rgba(255,255,255,0.4)" style={{ flexShrink: 0 }} />
                 <input
                   type={showPass ? 'text' : 'password'}
                   placeholder="Enter your password..."
@@ -257,7 +272,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPass(v => !v)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'rgba(255,255,255,0.3)' }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'rgba(255,255,255,0.4)' }}
                 >
                   {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
@@ -296,7 +311,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', textAlign: 'center', fontFamily: 'monospace', lineHeight: 1.6 }}>
+          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textAlign: 'center', fontFamily: 'monospace', lineHeight: 1.6 }}>
             DEMO MODE — Any password accepted<br />
             All access is logged per ICD-LTIA-SEC-2025
           </p>
@@ -304,8 +319,18 @@ export default function LoginPage() {
       </div>
 
       {/* Footer */}
-      <div style={{ marginTop: 24, fontSize: 10, color: 'rgba(255,255,255,0.2)', fontFamily: 'monospace', textAlign: 'center', letterSpacing: '0.05em' }}>
-        LTIA HBMS v4.2 · © 2025 Long Thanh International Airport Authority · Restricted System
+      <div style={{
+        marginTop: 24, fontSize: 10, color: 'rgba(255,255,255,0.45)',
+        fontFamily: 'monospace', textAlign: 'center', letterSpacing: '0.05em',
+        background: 'rgba(6, 11, 20, 0.75)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        padding: '6px 20px',
+        borderRadius: 20,
+        border: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+      }}>
+        LTIA HBMS v4.2 · © 2025 Long Thanh International Airport Authority · Restricted Supervisory System
       </div>
 
       <style>{`
